@@ -1,0 +1,23 @@
+\begin{thebibliography}{1}
+
+\bibitem{mcbride-paterson-2008-applicative-functors}
+Conor McBride and Ross Paterson.
+\newblock {Applicative programming with effects}.
+\newblock {\em Journal of Functional Programming}, 18(1):1--13, 2008.
+
+\bibitem{art-thesis}
+Alexey Radul.
+\newblock {\em {Propagation Networks: A Flexible and Expressive Substrate for
+  Computation}}.
+\newblock PhD thesis, Massachusetts Institute of Technology, Cambridge, MA,
+  September 2009.
+\newblock \url{http://hdl.handle.net/1721.1/49525}.
+
+\bibitem{art}
+Alexey Radul and Gerald~Jay Sussman.
+\newblock {The Art of the Propagator}.
+\newblock CSAIL Tech Report MIT-CSAIL-TR-2009-002, MIT Computer Science and
+  Artificial Intelligence Laboratory, Cambridge, MA, 2009.
+\newblock \url{http://hdl.handle.net/1721.1/44215}.
+
+\end{thebibliography}

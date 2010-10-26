@@ -1,0 +1,114 @@
+\BOOKMARK [0][-]{propagator-system.0}{Propagator System}{}
+\BOOKMARK [1][-]{section.1}{Propagator System}{propagator-system.0}
+\BOOKMARK [0][-]{getting-started.0}{Getting Started}{}
+\BOOKMARK [1][-]{section.2}{Getting Started}{getting-started.0}
+\BOOKMARK [1][-]{examples.1}{Examples}{getting-started.0}
+\BOOKMARK [2][-]{subsection.2.1}{Examples}{examples.1}
+\BOOKMARK [0][-]{the-details.0}{The Details}{}
+\BOOKMARK [1][-]{section.3}{The Details}{the-details.0}
+\BOOKMARK [0][-]{making-propagator-networks.0}{Making Propagator Networks}{}
+\BOOKMARK [1][-]{section.4}{Making Propagator Networks}{making-propagator-networks.0}
+\BOOKMARK [1][-]{attaching-basic-propagators-d.1}{Attaching Basic Propagators: d@}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.1}{Attaching Basic Propagators: d@}{attaching-basic-propagators-d.1}
+\BOOKMARK [1][-]{propagator-expressions-e.1}{Propagator Expressions: e@}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.2}{Propagator Expressions: e@}{propagator-expressions-e.1}
+\BOOKMARK [1][-]{late-binding-of-application.1}{Late Binding of Application}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.3}{Late Binding of Application}{late-binding-of-application.1}
+\BOOKMARK [1][-]{provided-primitives-p-foo-and-e-foo.1}{Provided Primitives: p:foo and e:foo}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.4}{Provided Primitives: p:foo and e:foo}{provided-primitives-p-foo-and-e-foo.1}
+\BOOKMARK [1][-]{cells-are-data-too.1}{Cells are Data Too}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.5}{Cells are Data Too}{cells-are-data-too.1}
+\BOOKMARK [1][-]{compound-data.1}{Compound Data}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.6}{Compound Data}{compound-data.1}
+\BOOKMARK [1][-]{propagator-constraints-c-foo-and-ce-foo.1}{Propagator Constraints: c:foo and ce:foo}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.7}{Propagator Constraints: c:foo and ce:foo}{propagator-constraints-c-foo-and-ce-foo.1}
+\BOOKMARK [1][-]{constants-and-literal-values.1}{Constants and Literal Values}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.8}{Constants and Literal Values}{constants-and-literal-values.1}
+\BOOKMARK [1][-]{constant-conversion.1}{Constant Conversion}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.9}{Constant Conversion}{constant-conversion.1}
+\BOOKMARK [1][-]{making-cells.1}{Making Cells}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.10}{Making Cells}{making-cells.1}
+\BOOKMARK [1][-]{conditional-network-construction.1}{Conditional Network Construction}{making-propagator-networks.0}
+\BOOKMARK [2][-]{subsection.4.11}{Conditional Network Construction}{conditional-network-construction.1}
+\BOOKMARK [0][-]{making-new-compound-propagators.0}{Making New Compound Propagators}{}
+\BOOKMARK [1][-]{section.5}{Making New Compound Propagators}{making-new-compound-propagators.0}
+\BOOKMARK [1][-]{lexical-scope.1}{Lexical Scope}{making-new-compound-propagators.0}
+\BOOKMARK [2][-]{subsection.5.1}{Lexical Scope}{lexical-scope.1}
+\BOOKMARK [1][-]{recursion.1}{Recursion}{making-new-compound-propagators.0}
+\BOOKMARK [2][-]{subsection.5.2}{Recursion}{recursion.1}
+\BOOKMARK [0][-]{using-partial-information.0}{Using Partial Information}{}
+\BOOKMARK [1][-]{section.6}{Using Partial Information}{using-partial-information.0}
+\BOOKMARK [0][-]{built-in-partial-information-structures.0}{Built-in Partial Information Structures}{}
+\BOOKMARK [1][-]{section.7}{Built-in Partial Information Structures}{built-in-partial-information-structures.0}
+\BOOKMARK [1][-]{nothing.1}{Nothing}{built-in-partial-information-structures.0}
+\BOOKMARK [2][-]{subsection.7.1}{Nothing}{nothing.1}
+\BOOKMARK [1][-]{just-a-value.1}{Just a Value}{built-in-partial-information-structures.0}
+\BOOKMARK [2][-]{subsection.7.2}{Just a Value}{just-a-value.1}
+\BOOKMARK [1][-]{numerical-intervals.1}{Numerical Intervals}{built-in-partial-information-structures.0}
+\BOOKMARK [2][-]{subsection.7.3}{Numerical Intervals}{numerical-intervals.1}
+\BOOKMARK [1][-]{propagator-cells-as-partial-information.1}{Propagator Cells as Partial Information}{built-in-partial-information-structures.0}
+\BOOKMARK [2][-]{subsection.7.4}{Propagator Cells as Partial Information}{propagator-cells-as-partial-information.1}
+\BOOKMARK [1][-]{id1.1}{Compound Data}{built-in-partial-information-structures.0}
+\BOOKMARK [2][-]{subsection.7.5}{Compound Data}{id1.1}
+\BOOKMARK [1][-]{closures.1}{Closures}{built-in-partial-information-structures.0}
+\BOOKMARK [2][-]{subsection.7.6}{Closures}{closures.1}
+\BOOKMARK [1][-]{truth-maintenance-systems.1}{Truth Maintenance Systems}{built-in-partial-information-structures.0}
+\BOOKMARK [2][-]{subsection.7.7}{Truth Maintenance Systems}{truth-maintenance-systems.1}
+\BOOKMARK [1][-]{contradiction.1}{Contradiction}{built-in-partial-information-structures.0}
+\BOOKMARK [2][-]{subsection.7.8}{Contradiction}{contradiction.1}
+\BOOKMARK [1][-]{implicit-dependency-directed-search.1}{Implicit Dependency-Directed Search}{built-in-partial-information-structures.0}
+\BOOKMARK [2][-]{subsection.7.9}{Implicit Dependency-Directed Search}{implicit-dependency-directed-search.1}
+\BOOKMARK [0][-]{making-new-kinds-of-partial-information.0}{Making New Kinds of Partial Information}{}
+\BOOKMARK [1][-]{section.8}{Making New Kinds of Partial Information}{making-new-kinds-of-partial-information.0}
+\BOOKMARK [1][-]{an-example-adding-interval-arithmetic.1}{An Example: Adding Interval Arithmetic}{making-new-kinds-of-partial-information.0}
+\BOOKMARK [2][-]{subsection.8.1}{An Example: Adding Interval Arithmetic}{an-example-adding-interval-arithmetic.1}
+\BOOKMARK [1][-]{generic-coercions.1}{Generic Coercions}{making-new-kinds-of-partial-information.0}
+\BOOKMARK [2][-]{subsection.8.2}{Generic Coercions}{generic-coercions.1}
+\BOOKMARK [1][-]{the-partial-information-generics.1}{The Partial Information Generics}{making-new-kinds-of-partial-information.0}
+\BOOKMARK [2][-]{subsection.8.3}{The Partial Information Generics}{the-partial-information-generics.1}
+\BOOKMARK [2][-]{the-full-story-on-merge.2}{The Full Story on Merge}{the-partial-information-generics.1}
+\BOOKMARK [3][-]{subsubsection.8.3.1}{The Full Story on Merge}{the-full-story-on-merge.2}
+\BOOKMARK [1][-]{individual-propagator-generics.1}{Individual Propagator Generics}{making-new-kinds-of-partial-information.0}
+\BOOKMARK [2][-]{subsection.8.4}{Individual Propagator Generics}{individual-propagator-generics.1}
+\BOOKMARK [1][-]{uniform-applicative-extension-of-propagators.1}{Uniform Applicative Extension of Propagators}{making-new-kinds-of-partial-information.0}
+\BOOKMARK [2][-]{subsection.8.5}{Uniform Applicative Extension of Propagators}{uniform-applicative-extension-of-propagators.1}
+\BOOKMARK [1][-]{interoperation-with-existing-partial-information-types.1}{Interoperation with Existing Partial Information Types}{making-new-kinds-of-partial-information.0}
+\BOOKMARK [2][-]{subsection.8.6}{Interoperation with Existing Partial Information Types}{interoperation-with-existing-partial-information-types.1}
+\BOOKMARK [0][-]{making-new-primitive-propagators.0}{Making New Primitive Propagators}{}
+\BOOKMARK [1][-]{section.9}{Making New Primitive Propagators}{making-new-primitive-propagators.0}
+\BOOKMARK [1][-]{direct-construction-from-functions.1}{Direct Construction from Functions}{making-new-primitive-propagators.0}
+\BOOKMARK [2][-]{subsection.9.1}{Direct Construction from Functions}{direct-construction-from-functions.1}
+\BOOKMARK [2][-]{expression-style-variants.2}{Expression Style Variants}{direct-construction-from-functions.1}
+\BOOKMARK [3][-]{subsubsection.9.1.1}{Expression Style Variants}{expression-style-variants.2}
+\BOOKMARK [1][-]{propagatify.1}{Propagatify}{making-new-primitive-propagators.0}
+\BOOKMARK [2][-]{subsection.9.2}{Propagatify}{propagatify.1}
+\BOOKMARK [1][-]{compound-cell-carrier-construction.1}{Compound Cell Carrier Construction}{making-new-primitive-propagators.0}
+\BOOKMARK [2][-]{subsection.9.3}{Compound Cell Carrier Construction}{compound-cell-carrier-construction.1}
+\BOOKMARK [1][-]{fully-manual-low-level-propagator-construction.1}{Fully-manual Low-level Propagator Construction}{making-new-primitive-propagators.0}
+\BOOKMARK [2][-]{subsection.9.4}{Fully-manual Low-level Propagator Construction}{fully-manual-low-level-propagator-construction.1}
+\BOOKMARK [0][-]{debugging.0}{Debugging}{}
+\BOOKMARK [1][-]{section.10}{Debugging}{debugging.0}
+\BOOKMARK [0][-]{miscellany.0}{Miscellany}{}
+\BOOKMARK [1][-]{section.11}{Miscellany}{miscellany.0}
+\BOOKMARK [1][-]{macrology.1}{Macrology}{miscellany.0}
+\BOOKMARK [2][-]{subsection.11.1}{Macrology}{macrology.1}
+\BOOKMARK [1][-]{reboots.1}{Reboots}{miscellany.0}
+\BOOKMARK [2][-]{subsection.11.2}{Reboots}{reboots.1}
+\BOOKMARK [1][-]{compiling.1}{Compiling}{miscellany.0}
+\BOOKMARK [2][-]{subsection.11.3}{Compiling}{compiling.1}
+\BOOKMARK [1][-]{scmutils.1}{Scmutils}{miscellany.0}
+\BOOKMARK [2][-]{subsection.11.4}{Scmutils}{scmutils.1}
+\BOOKMARK [1][-]{editing.1}{Editing}{miscellany.0}
+\BOOKMARK [2][-]{subsection.11.5}{Editing}{editing.1}
+\BOOKMARK [1][-]{hacking.1}{Hacking}{miscellany.0}
+\BOOKMARK [2][-]{subsection.11.6}{Hacking}{hacking.1}
+\BOOKMARK [1][-]{arbitrary-choices.1}{Arbitrary Choices}{miscellany.0}
+\BOOKMARK [2][-]{subsection.11.7}{Arbitrary Choices}{arbitrary-choices.1}
+\BOOKMARK [2][-]{default-application-and-definition-style.2}{Default Application and Definition Style}{arbitrary-choices.1}
+\BOOKMARK [3][-]{subsubsection.11.7.1}{Default Application and Definition Style}{default-application-and-definition-style.2}
+\BOOKMARK [2][-]{locus-of-delayed-construction.2}{Locus of Delayed Construction}{arbitrary-choices.1}
+\BOOKMARK [3][-]{subsubsection.11.7.2}{Locus of Delayed Construction}{locus-of-delayed-construction.2}
+\BOOKMARK [2][-]{strategy-for-compound-data.2}{Strategy for Compound Data}{arbitrary-choices.1}
+\BOOKMARK [3][-]{subsubsection.11.7.3}{Strategy for Compound Data}{strategy-for-compound-data.2}
+\BOOKMARK [0][-]{how-this-supports-the-goal.0}{How this supports the goal}{}
+\BOOKMARK [1][-]{section.12}{How this supports the goal}{how-this-supports-the-goal.0}

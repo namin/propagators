@@ -1,0 +1,2087 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<title>Revised Report on the Propagator Model</title>
+<style type="text/css">
+
+@import url(html4css1.css);
+
+body {
+  background: white;
+  font-family: verdana, arial, helvetica, sans-serif;
+  margin: 0px;
+  padding: 6px;
+}
+
+h1, h2 {
+  color: #333333;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-top: 0.0em;
+}
+
+p {
+  margin-top: 0.5em;
+  text-align: justify;
+}
+
+.document {
+  max-width: 50em;
+  margin: 0 auto;
+}
+
+/* People list */
+.people { overflow: auto; }
+.person {
+  float: left;
+  text-align: center;
+  padding: .5em;
+  width: 160px;
+  height: 180px;
+}
+.person img { height: 120px; }
+.person .name { font-weight: bold; }
+.person { font-size: 80%; }
+
+</style>
+</head>
+<body>
+<div class="document" id="revised-report-on-the-propagator-model">
+<h1 class="title">Revised Report on the Propagator Model</h1>
+
+<blockquote>
+by Alexey Radul and Gerald Jay Sussman</blockquote>
+<p>Abstract:</p>
+<blockquote>
+In the past year we have made serious progress
+on elaborating the propagator programming model
+(see 1,2).  Things have gotten serious enough to
+build a system that can be used for real
+experiments.</blockquote>
+<p>Perhaps the most important problem facing a programmer is the revision
+of an existing program to extend it for some new situation.
+Unfortunately, the traditional models of programming provide little
+support for this activity.  The programmer often finds that
+commitments made in the existing code impede the extension, but the
+costs of reversing those commitments are excessive.</p>
+<p>Such commitments tend to take the form of choices of strategy.  In the
+design of any significant system there are many implementation plans
+proposed for every component at every level of detail.  However, in
+the system that is finally delivered this diversity of plans is lost
+and usually only one unified plan is adopted and implemented.  As in
+an ecological system, the loss of diversity in the traditional
+engineering process has serious consequences.</p>
+<p>The Propagator Programming Model is an attempt to mitigate this
+problem.  It is a model that supports the expression and integration
+of multiple viewpoints on a design.  It incorporates explicit
+structure to support the integration of redundant pieces and
+degenerate subsystems.  It will help us integrate the diversity that
+was inherent in the design process into the delivered operational
+product.</p>
+<p>The Propagator Programming Model is built on the idea that the basic
+computational elements are autonomous machines interconnected by
+shared cells through which they communicate.  Each machine
+continuously examines the cells it is interested in, and adds
+information to some based on deductions it can make from information
+from the others.  Cells accumulate information from the propagators
+that produce that information.  The key idea here is additivity.  New
+ways to make contributions can be added just by adding new
+propagators; if an approach to a problem doesn't turn out to work
+well, it can be ignored, dynamically and without disruption.</p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#propagator-system" id="id2">Propagator System</a></li>
+<li><a class="reference internal" href="#getting-started" id="id3">Getting Started</a></li>
+<li><a class="reference internal" href="#the-details" id="id4">The Details</a></li>
+<li><a class="reference internal" href="#making-propagator-networks" id="id5">Making Propagator Networks</a><ul>
+<li><a class="reference internal" href="#attaching-basic-propagators-d-and-p-foo" id="id6">Attaching Basic Propagators: d&#64; and p:foo</a></li>
+<li><a class="reference internal" href="#propagator-expressions-e" id="id7">Propagator Expressions: e&#64;</a></li>
+<li><a class="reference internal" href="#propagator-constraints-c-foo-and-ce-foo" id="id8">Propagator Constraints: c:foo and ce:foo</a></li>
+<li><a class="reference internal" href="#constants-and-literal-values" id="id9">Constants and Literal Values</a></li>
+<li><a class="reference internal" href="#constant-conversion" id="id10">Constant Conversion</a></li>
+<li><a class="reference internal" href="#making-cells" id="id11">Making Cells</a></li>
+<li><a class="reference internal" href="#conditional-network-construction" id="id12">Conditional Network Construction</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#making-new-compound-propagators" id="id13">Making New Compound Propagators</a><ul>
+<li><a class="reference internal" href="#lexical-scope" id="id14">Lexical Scope</a></li>
+<li><a class="reference internal" href="#recursion" id="id15">Recursion</a></li>
+<li><a class="reference internal" href="#macrology" id="id16">Macrology</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-partial-information" id="id17">Using Partial Information</a></li>
+<li><a class="reference internal" href="#built-in-partial-information-structures" id="id18">Built-in Partial Information Structures</a><ul>
+<li><a class="reference internal" href="#nothing" id="id19">Nothing</a></li>
+<li><a class="reference internal" href="#a-raw-scheme-object" id="id20">A Raw Scheme Object</a></li>
+<li><a class="reference internal" href="#numerical-intervals" id="id21">Numerical Intervals</a></li>
+<li><a class="reference internal" href="#compound-data" id="id22">Compound Data</a></li>
+<li><a class="reference internal" href="#propagator-cells-as-partial-information" id="id23">Propagator Cells as Partial Information</a></li>
+<li><a class="reference internal" href="#closures" id="id24">Closures</a></li>
+<li><a class="reference internal" href="#truth-maintenance-systems" id="id25">Truth Maintenance Systems</a></li>
+<li><a class="reference internal" href="#contradiction" id="id26">Contradiction</a></li>
+<li><a class="reference internal" href="#implicit-dependency-directed-search" id="id27">Implicit Dependency-Directed Search</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#making-new-kinds-of-partial-information" id="id28">Making New Kinds of Partial Information</a><ul>
+<li><a class="reference internal" href="#an-example-adding-interval-arithmetic" id="id29">An Example: Adding Interval Arithmetic</a></li>
+<li><a class="reference internal" href="#generic-coercions" id="id30">Generic Coercions</a></li>
+<li><a class="reference internal" href="#the-partial-information-generics" id="id31">The Partial Information Generics</a><ul>
+<li><a class="reference internal" href="#the-full-story-on-merge" id="id32">The Full Story on Merge</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#individual-propagator-generics" id="id33">Individual Propagator Generics</a></li>
+<li><a class="reference internal" href="#uniform-applicative-extension-of-propagators" id="id34">Uniform Applicative Extension of Propagators</a></li>
+<li><a class="reference internal" href="#interoperation-with-existing-partial-information-types" id="id35">Interoperation with Existing Partial Information Types</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#making-new-primitive-propagators" id="id36">Making New Primitive Propagators</a><ul>
+<li><a class="reference internal" href="#direct-construction-from-functions" id="id37">Direct Construction from Functions</a><ul>
+<li><a class="reference internal" href="#propagator-constructor-combinators" id="id38">Propagator Constructor Combinators</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dwim-propagator-construction" id="id39">DWIM Propagator Construction</a></li>
+<li><a class="reference internal" href="#compound-cell-carrier-construction" id="id40">Compound Cell Carrier Construction</a></li>
+<li><a class="reference internal" href="#fully-manual-low-level-propagator-construction" id="id41">Fully-manual Low-level Propagator Construction</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#debugging" id="id42">Debugging</a></li>
+<li><a class="reference internal" href="#miscellany" id="id43">Miscellany</a><ul>
+<li><a class="reference internal" href="#implicit-cell-syntax" id="id44">Implicit Cell Syntax</a></li>
+<li><a class="reference internal" href="#reboots" id="id45">Reboots</a></li>
+<li><a class="reference internal" href="#compiling" id="id46">Compiling</a></li>
+<li><a class="reference internal" href="#scmutils" id="id47">Scmutils</a></li>
+<li><a class="reference internal" href="#editing" id="id48">Editing</a></li>
+<li><a class="reference internal" href="#hacking" id="id49">Hacking</a></li>
+<li><a class="reference internal" href="#examples" id="id50">Examples</a></li>
+<li><a class="reference internal" href="#arbitrary-choices" id="id51">Arbitrary Choices</a></li>
+<li><a class="reference internal" href="#revision-history-of-this-guide" id="id52">Revision History of this Guide</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#how-this-supports-the-goal" id="id53">How this supports the goal</a></li>
+</ul>
+</div>
+<div class="section" id="propagator-system">
+<h1><a class="toc-backref" href="#id2">Propagator System</a></h1>
+<p>Although most of this document introduces you to the Scheme-Propagator
+system that we have developed in MIT Scheme, the Propagator Model is
+really independent of the language.  You should be able to write
+propagators in any language you choose, and others should be able to
+write subsystems in their favorite language, that cooperate with your
+subsystems.  What is necessary is that all users agree on the protocol
+by which propagators communicate with the cells that are shared among
+subsystems.  These rules are very simple and we can enumerate them
+right here:</p>
+<p>Cells must support three operations:
+- add some content
+- collect the content currently accumulated
+- register a propagator to be notified when the accumulated content changes</p>
+<p>When new content is added to a cell, the cell must merge the addition
+with the content already present.  When a propagator asks for the
+content of a cell, the cell must deliver a complete summary of the
+information that has been added to it.</p>
+<p>The merging of content must be commutative, associative, and
+idempotent.  The behavior of propagators must be monotonic with
+respect to the lattice induced by the merge operation.</p>
+</div>
+<div class="section" id="getting-started">
+<h1><a class="toc-backref" href="#id3">Getting Started</a></h1>
+<p>Scheme-Propagators is implemented in <a class="reference external" href="http://www.gnu.org/software/mit-scheme/">MIT/GNU Scheme</a>, which you will
+need in order to use it.  You will also need Scheme-Propagators
+itself, which you can check out from the <a class="reference external" href="git&#64;github.com:MIT-MMP/propagator.git">MMP git archive</a>.  Once you
+have it, go to the <tt class="docutils literal"><span class="pre">propagator/</span></tt> directory, start up your Scheme and
+load the main entry file with <tt class="docutils literal"><span class="pre">(load</span> <span class="pre">&quot;load&quot;)</span></tt>.  This gives you a
+read-eval-print loop (traditionally called a REPL for short) for both
+the Scheme-Propagators system and the underlying Scheme
+implementation.  Check out the README for more on this.
+TODO Real releases?  From a real web place?</p>
+<p>Once you've got your REPL, you can start typing away at it to create
+propagator networks, give them inputs, ask them to do computations,
+and look at the results.</p>
+<p>Here's a little propagator example that adds two and three to get
+five:</p>
+<pre class="literal-block">
+(define-cell a)
+(define-cell b)
+(add-content a 3)
+(add-content b 2)
+(define-cell answer (e:+ a b))
+(run)
+(content answer) ==&gt; 5
+</pre>
+<p>Each of the parenthesized phrases above are things to type into the
+REPL, and the <tt class="docutils literal"><span class="pre">==&gt;</span> <span class="pre">5</span></tt> at the end is the result that Scheme will
+print.  I omitted the results of all the other expressions because
+they are not interesting.</p>
+<p>Let's have a closer look at what's going on in this example, to serve
+as a guide for more in-depth discussion later.  <tt class="docutils literal"><span class="pre">define-cell</span></tt> is a
+Scheme macro for making and naming propagator cells:</p>
+<pre class="literal-block">
+(define-cell a)
+</pre>
+<p>creates a new cell and binds it to the Scheme variable <tt class="docutils literal"><span class="pre">a</span></tt>.</p>
+<pre class="literal-block">
+(define-cell b)
+</pre>
+<p>makes another one.  Then <tt class="docutils literal"><span class="pre">add-content</span></tt> is the Scheme procedure that
+directly zaps some information into a propagator cell (all the
+propagators use it to talk to the cells, and you can too).  So:</p>
+<pre class="literal-block">
+(add-content a 3)
+</pre>
+<p>puts a <tt class="docutils literal"><span class="pre">3</span></tt> into the cell named <tt class="docutils literal"><span class="pre">a</span></tt>, and:</p>
+<pre class="literal-block">
+(add-content b 2)
+</pre>
+<p>puts a <tt class="docutils literal"><span class="pre">2</span></tt> into the cell named <tt class="docutils literal"><span class="pre">b</span></tt>.  Now <tt class="docutils literal"><span class="pre">e:+</span></tt> (I'll explain
+that naming convention later) is a Scheme procedure that creates a
+propagator that adds, attaches it to the given cells as inputs, and
+makes a cell to hold the adder's output and returns it.  So:</p>
+<pre class="literal-block">
+(define-cell answer (e:+ a b))
+</pre>
+<p>creates an adding propagator, and also creates a cell, now called
+<tt class="docutils literal"><span class="pre">answer</span></tt>, to hold the result of the addition.  Be careful!  No
+computation has happened yet.  You've just made up a network, but it
+hasn't done its work yet.  That's what the Scheme procedure <tt class="docutils literal"><span class="pre">run</span></tt> is
+for:</p>
+<pre class="literal-block">
+(run)
+</pre>
+<p>actually executes the network, and only when the network is done
+computing does it give you back the REPL to interact with.  Finally
+<tt class="docutils literal"><span class="pre">content</span></tt> is a Scheme procedure that gets the content of cells:</p>
+<pre class="literal-block">
+(content answer)
+</pre>
+<p>looks at what the cell named <tt class="docutils literal"><span class="pre">answer</span></tt> has now, which is <tt class="docutils literal"><span class="pre">5</span></tt>
+because the addition propagator created by <tt class="docutils literal"><span class="pre">e:+</span></tt> has had a chance to
+do its job.  If you had forgotten to type <tt class="docutils literal"><span class="pre">(run)</span></tt> before typing
+<tt class="docutils literal"><span class="pre">(content</span> <span class="pre">answer)</span></tt>, it would have printed out <tt class="docutils literal"><span class="pre">#(*the-nothing*)</span></tt>,
+which means that cell has no information about the value it is meant
+to have.</p>
+</div>
+<div class="section" id="the-details">
+<h1><a class="toc-backref" href="#id4">The Details</a></h1>
+<p>Now that you know how to play around with our propagators we have to
+tell you what we actually provide.  In every coherent system for
+building stuff there are primitive parts, the means by which they can
+be combined, and means by which combinations can be abstracted so that
+they can be named and treated as if they are primitive.</p>
+</div>
+<div class="section" id="making-propagator-networks">
+<h1><a class="toc-backref" href="#id5">Making Propagator Networks</a></h1>
+<p>The ingredients of a propagator network are cells and propagators.
+The cells' job is to remember things; the propagators' job is to
+compute.  The analogy is that propagators are like the procedures of a
+traditional programming language, and cells are like the memory
+locations; the big difference is that cells accumulate partial
+information (which may involve arbitrary internal computations), and
+can therefore have many propagators reading information from them and
+writing information to them.</p>
+<p>The two basic operations when making a propagator network are making
+cells and attaching propagators to cells.  You already met one way to
+make cells in the form of <tt class="docutils literal"><span class="pre">define-cell</span></tt>; we will talk about more
+later, but let's talk about propagators first.</p>
+<div class="section" id="attaching-basic-propagators-d-and-p-foo">
+<h2><a class="toc-backref" href="#id6">Attaching Basic Propagators: d&#64; and p:foo</a></h2>
+<p>The Scheme procedure <tt class="docutils literal"><span class="pre">d&#64;</span></tt> attaches propagators to cells.  The
+name <tt class="docutils literal"><span class="pre">d&#64;</span></tt> is mnemonic for &quot;diagram apply&quot;.  For
+example, <tt class="docutils literal"><span class="pre">p:+</span></tt> makes adder propagators:</p>
+<pre class="literal-block">
+(d&#64; p:+ foo bar baz)
+</pre>
+<p>means attach a propagator that will add the contents of the cells
+named <tt class="docutils literal"><span class="pre">foo</span></tt> and <tt class="docutils literal"><span class="pre">bar</span></tt> and write the sum into the cell named <tt class="docutils literal"><span class="pre">baz</span></tt>.
+Once attached, whenever either the <tt class="docutils literal"><span class="pre">foo</span></tt> cell or the <tt class="docutils literal"><span class="pre">bar</span></tt> cell
+gets any new interesting information, the adding propagator will
+eventually compute the appropriate sum and give it to <tt class="docutils literal"><span class="pre">baz</span></tt> as an
+update.</p>
+<p>Many propagator primitives directly expose procedures from the
+underlying Scheme, with the naming convention that <tt class="docutils literal"><span class="pre">p:foo</span></tt> does the
+job <tt class="docutils literal"><span class="pre">foo</span></tt> to the contents of an appropriate pile of input cells and
+gives the result to an output cell (<tt class="docutils literal"><span class="pre">p</span></tt> stands for &quot;propagator&quot;):</p>
+<p>p:+
+p:-
+p:*
+p:/
+p:abs
+p:square
+p:sqrt
+p:=
+p:&lt;
+p:&gt;
+p:&lt;=
+p:&gt;=
+p:not
+p:and
+p:or
+p:eq?
+p:eqv?
+p:expt</p>
+<p>Others do not correspond to Scheme procedures exactly:
+(p:constant value)
+p:swtich
+p:conditional
+p:conditional-router
+p:==
+p:cons
+p:pair?
+p:car
+p:cdr</p>
+<p>By convention, cells used as outputs go last.</p>
+</div>
+<div class="section" id="propagator-expressions-e">
+<h2><a class="toc-backref" href="#id7">Propagator Expressions: e&#64;</a></h2>
+<p>The <tt class="docutils literal"><span class="pre">d&#64;</span></tt> style is the right underlying way to think about the
+construction of propagator networks.  However, it has the unfortunate
+feature that it requires the naming of cells for holding all
+intermediate values in a computation, and in that sense programming
+with <tt class="docutils literal"><span class="pre">d&#64;</span></tt> feels a lot like writing assembly language.</p>
+<p>It is pretty common to have expressions: one's propagator networks
+will have some intermediate values that are produced by only one
+propagator, and consumed by only one propagator.  In this case it is a
+drag to have to define and name a cell for that value, if one would
+just name it &quot;the output of foo&quot;.  Scheme-Propagators provides a
+syntactic sugar for writing cases like this in an expression style, like a
+traditional programming language.</p>
+<p>The Scheme procedure <tt class="docutils literal"><span class="pre">e&#64;</span></tt> attaches propagators in expression style.
+The name <tt class="docutils literal"><span class="pre">e&#64;</span></tt> is mnemonic for &quot;expression apply&quot;.  The <tt class="docutils literal"><span class="pre">e&#64;</span></tt>
+procedure is just like <tt class="docutils literal"><span class="pre">d&#64;</span></tt>, except it synthesizes an extra cell to
+serve as the last argument to <tt class="docutils literal"><span class="pre">d&#64;</span></tt>, and returns it from the <tt class="docutils literal"><span class="pre">e&#64;</span></tt>
+expression (whereas the return value of <tt class="docutils literal"><span class="pre">d&#64;</span></tt> is unspecified).  For
+example, here are two ways to do the same thing:</p>
+<pre class="literal-block">
+(define-cell x)
+(define-cell y)
+(define-cell z)
+(d&#64; p:* x y z)
+</pre>
+<p>and:</p>
+<pre class="literal-block">
+(define-cell x)
+(define-cell y)
+(define-cell z (e&#64; p:* x y))
+</pre>
+<p>Generally the <tt class="docutils literal"><span class="pre">e&#64;</span></tt> style is convenient because it chains in
+the familiar way</p>
+<pre class="literal-block">
+(e&#64; p:- w (e&#64; p:* (e&#64; p:+ x y) z))
+</pre>
+<p>Because of the convention that output cells are listed last,
+expressions in <tt class="docutils literal"><span class="pre">e&#64;</span></tt> style build propagator networks that
+compute corresponding Lisp expressions.</p>
+<p>On the other hand, the <tt class="docutils literal"><span class="pre">d&#64;</span></tt> style is necessary when a propagator
+needs to be attached to a full set of cells that are already there.
+For example, if one wanted to be able to go back from <tt class="docutils literal"><span class="pre">z</span></tt> and one of
+<tt class="docutils literal"><span class="pre">x</span></tt> or <tt class="docutils literal"><span class="pre">y</span></tt> to the other, rather than just from <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> to
+<tt class="docutils literal"><span class="pre">z</span></tt>, one could write:</p>
+<pre class="literal-block">
+(define-cell x)
+(define-cell y)
+(define-cell z (e&#64; p:* x y))
+(d&#64; p:/ z x y)
+(d&#64; p:/ z y x)
+</pre>
+<p>and get a multidirectional constraint:</p>
+<pre class="literal-block">
+(add-content z 6)
+(add-content x 3)
+(run)
+(content y) ==&gt; 2
+</pre>
+<p>To save typing when the propagator being attached is known at network
+construction time, the <tt class="docutils literal"><span class="pre">p:foo</span></tt> objects are also themselves
+applicable in Scheme, defaulting to applying themselves in the <tt class="docutils literal"><span class="pre">d&#64;</span></tt>
+style.  Each also has an <tt class="docutils literal"><span class="pre">e:foo</span></tt> variant that defaults to the <tt class="docutils literal"><span class="pre">e&#64;</span></tt>
+style.  So the following also works:</p>
+<pre class="literal-block">
+(define-cell x)
+(define-cell y)
+(define-cell z (e:* x y))
+(p:/ z x y)
+(p:/ z y x)
+</pre>
+<p>TODO This discussion of explicitly applying cells whose content
+propagator constructors are not yet known probably goes later in the
+document:</p>
+<p>The preceding discusses attaching propagators to cells when the
+propagators being attached are known at network construction time.
+Since Scheme-Propagators is a higer-order language, that will not
+always be the case.  (TODO Example?)  More important, like all other
+possible data, the propagator being applied may be known only
+partially.  What is <tt class="docutils literal"><span class="pre">d&#64;</span></tt> to do then?</p>
+<p>If the cell which is the first argument to <tt class="docutils literal"><span class="pre">d&#64;</span></tt> does not have a
+propagator in it, or has only a partially known propagator in it,
+<tt class="docutils literal"><span class="pre">d&#64;</span></tt> constructs a propagator that will dynamically apply propagators
+that show up in that cell when they do.  Moreover, <tt class="docutils literal"><span class="pre">d&#64;</span></tt> ensures that
+any uncertainty associated with the question of which propagator is
+being applied is forwarded to the output (and also to the interior of
+the application).  (TODO Example)</p>
+<p><tt class="docutils literal"><span class="pre">d&#64;</span></tt> always applies in diagram style.  <tt class="docutils literal"><span class="pre">e&#64;</span></tt> always applies in
+expression style.  If you put into operator position a cell that
+contains a fully-known propagator at network construction time, it
+will be applied either in diagram style or expression style, as
+dependent on that propagator's default preference.  If you put into
+operator position a cell that does not have a fully-known propagator
+at network construction time, it will be applied in diagram style by
+default (TODO or should it signal an error?)</p>
+</div>
+<div class="section" id="propagator-constraints-c-foo-and-ce-foo">
+<h2><a class="toc-backref" href="#id8">Propagator Constraints: c:foo and ce:foo</a></h2>
+<p>Constraints are so useful that many are predefined, and they have
+their own naming convention.  <tt class="docutils literal"><span class="pre">c:</span></tt> stands for &quot;constraining&quot;.  A
+thing named <tt class="docutils literal"><span class="pre">c:foo</span></tt> is the constraining analogue of <tt class="docutils literal"><span class="pre">p:foo</span></tt>, in
+that in addition to attaching a propagator that does <tt class="docutils literal"><span class="pre">foo</span></tt> to its
+cells, it also attaches <tt class="docutils literal"><span class="pre">foo-inverse</span></tt> propagators that deduce
+&quot;inputs&quot; from &quot;outputs&quot;.  For example, the product constraint that we
+built in the previous section is available as <tt class="docutils literal"><span class="pre">c:*</span></tt>:</p>
+<pre class="literal-block">
+(define-cell x)
+(define-cell y)
+(define-cell z)
+(d&#64; c:* x y z)
+
+(add-content z 12)
+(add-content y 4)
+(run)
+(content x) ==&gt; 3
+</pre>
+<p>The <tt class="docutils literal"><span class="pre">c:foo</span></tt> objects, like the <tt class="docutils literal"><span class="pre">p:foo</span></tt> objects, are also
+self-applicable, and also default to applying themselves
+in diagram style:</p>
+<pre class="literal-block">
+(c:* x y z)  ==  (d&#64; c:* x y z)
+</pre>
+<p>The <tt class="docutils literal"><span class="pre">c:foo</span></tt> objects also have <tt class="docutils literal"><span class="pre">ce:foo</span></tt> analogues, that
+apply themselves in expression style:</p>
+<pre class="literal-block">
+(ce:* x y)  ==  (e&#64; c:* x y)
+</pre>
+<p>Of course, not every operation has a useful inverse, so there are
+fewer <tt class="docutils literal"><span class="pre">c:</span></tt> procedures defined than <tt class="docutils literal"><span class="pre">p:</span></tt>:</p>
+<p>c:+       ce:+
+c:*       ce:*
+c:square  ce:square
+c:not     ce:not
+c:id
+c:==      ce:==</p>
+</div>
+<div class="section" id="constants-and-literal-values">
+<h2><a class="toc-backref" href="#id9">Constants and Literal Values</a></h2>
+<p>Programs have embedded constants all the time, and propagator programs
+are no different (except that constant values, like all other values,
+can be partial).  We've already seen one way to put a Scheme value
+into a propagator program: the <tt class="docutils literal"><span class="pre">add-content</span></tt> procedure zaps a value
+straight into a cell.  This is generally encouraged at the REPL, but
+frowned upon in actual programs.  It is much nicer to use <tt class="docutils literal"><span class="pre">constant</span></tt>
+or <tt class="docutils literal"><span class="pre">p:constant</span></tt> (they're the same) to make a propagator that will
+zap your value into your cell for you:</p>
+<pre class="literal-block">
+(define-cell thing)
+((constant 5) thing)
+(content thing) ==&gt; #(*the-nothing*)
+(run)
+(content thing) ==&gt; 5
+</pre>
+<p>There is also an expression-oriented version, called, naturally,
+<tt class="docutils literal"><span class="pre">e:constant</span></tt>:</p>
+<pre class="literal-block">
+(define-cell thing (e:constant 5))
+(run)
+(content thing) ==&gt; 5
+</pre>
+</div>
+<div class="section" id="constant-conversion">
+<h2><a class="toc-backref" href="#id10">Constant Conversion</a></h2>
+<p>In fact, inserting constants is so important, that there is one more
+nicification of this: whenever possible, the system will convert a raw
+constant (i.e. a non-cell Scheme object) into a cell, using
+<tt class="docutils literal"><span class="pre">e:constant</span></tt>.</p>
+<p>Some examples:</p>
+<pre class="literal-block">
+(e:+ x 2)          ==   (e:+ x (e:constant 2))
+(define-cell x 4)  ==   (define-cell x (e:constant 4))
+(c:+ x y 0)        ==   (c:+ x y (e:constant 0))
+</pre>
+</div>
+<div class="section" id="making-cells">
+<h2><a class="toc-backref" href="#id11">Making Cells</a></h2>
+<p>Cells are the memory locations of the Scheme-Propagators
+language; Scheme variables whose bindings are cells correspond to
+Scheme-Propagators variables (Scheme variables whose bindings are
+other things look like syntax to Scheme-Propagators).  We've
+already met one way to make cells:</p>
+<pre class="literal-block">
+(define-cell x)
+</pre>
+<p>creates a Scheme variable named <tt class="docutils literal"><span class="pre">x</span></tt> and binds a cell to it.  The
+underlying mechanism underneath this is the procedure <tt class="docutils literal"><span class="pre">make-cell</span></tt>,
+which creates a cell and lets you do whatever you want with it.  So
+you could write:</p>
+<pre class="literal-block">
+(define x (make-cell))
+</pre>
+<p>which would also make a Scheme variable named <tt class="docutils literal"><span class="pre">x</span></tt> and bind a cell to
+it.  In fact, that is almost exactly what <tt class="docutils literal"><span class="pre">define-cell</span></tt> does, except
+that <tt class="docutils literal"><span class="pre">define-cell</span></tt> attaches some metadata to the cell it creates to
+make it easier to debug the network (see below) and also does constant
+conversion (so <tt class="docutils literal"><span class="pre">(define-cell</span> <span class="pre">x</span> <span class="pre">5)</span></tt> makes <tt class="docutils literal"><span class="pre">x</span></tt> a cell that will get
+a <tt class="docutils literal"><span class="pre">5</span></tt> put into it, whereas <tt class="docutils literal"><span class="pre">(define</span> <span class="pre">x</span> <span class="pre">5)</span></tt> would just bind <tt class="docutils literal"><span class="pre">x</span></tt> to
+<tt class="docutils literal"><span class="pre">5</span></tt>).</p>
+<p>Just as Scheme has several mechanisms of making variables, so
+Scheme-Propagators has corresponding ones.  Corresponding to Scheme's
+<tt class="docutils literal"><span class="pre">let</span></tt>, Scheme-Propagators has <tt class="docutils literal"><span class="pre">let-cells</span></tt>:</p>
+<pre class="literal-block">
+(let-cells ((foo (e:+ x y))
+            (bar (e:* x y)))
+  ...)
+</pre>
+<p>will create the Scheme bindings <tt class="docutils literal"><span class="pre">foo</span></tt> and <tt class="docutils literal"><span class="pre">bar</span></tt>, and bind them to
+the cells made by <tt class="docutils literal"><span class="pre">(e:+</span> <span class="pre">x</span> <span class="pre">y)</span></tt> and <tt class="docutils literal"><span class="pre">(e:*</span> <span class="pre">x</span> <span class="pre">y)</span></tt>, respectively (this
+code is only sensible if <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> are already bound to cells
+(or subject to constant conversion)).  The new bindings will only be
+visible inside the scope of the <tt class="docutils literal"><span class="pre">let-cells</span></tt>, just like in Scheme;
+but if you attach propagators to them, the cells themselves will
+continue to exist and function as part of your propagator network.</p>
+<p>One notable difference from Scheme: a cell in a propagator network,
+unlike a variable in Scheme, has a perfectly good &quot;initial state&quot;.
+Every cell starts life knowing <tt class="docutils literal"><span class="pre">nothing</span></tt> about its intended
+contents; where Scheme variables have to start life in a weird
+&quot;unassigned&quot; state, <tt class="docutils literal"><span class="pre">nothing</span></tt> is a perfectly good partial
+information structure.  This means that it's perfectly reasonable
+for <tt class="docutils literal"><span class="pre">let-cells</span></tt> to make cells with no initialization forms:</p>
+<pre class="literal-block">
+(let-cells (x y (foo (some thing))) ...)
+</pre>
+<p>creates cells named <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt>, which are empty and have
+no propagators attached to them initially, and also a cell
+named <tt class="docutils literal"><span class="pre">foo</span></tt> like above.  <tt class="docutils literal"><span class="pre">let-cells</span></tt> also recognizes the
+usage:</p>
+<pre class="literal-block">
+(let-cells ((x) (y) (foo (some thing))) ...)
+</pre>
+<p>by analogy with Scheme <tt class="docutils literal"><span class="pre">let</span></tt>.</p>
+<p>Corresponding to Scheme's <tt class="docutils literal"><span class="pre">let*</span></tt>, Scheme-Propagators has
+<tt class="docutils literal"><span class="pre">let-cells*</span></tt>.  <tt class="docutils literal"><span class="pre">let-cells*</span></tt> is to <tt class="docutils literal"><span class="pre">let-cells</span></tt> what <tt class="docutils literal"><span class="pre">let*</span></tt> is
+to <tt class="docutils literal"><span class="pre">let</span></tt>:</p>
+<pre class="literal-block">
+(let-cells* ((x)
+             (y (e:+ x x)))
+  ...)
+</pre>
+<p>will make a cell named <tt class="docutils literal"><span class="pre">x</span></tt> and a cell named <tt class="docutils literal"><span class="pre">y</span></tt> with an adder both
+of whose inputs are <tt class="docutils literal"><span class="pre">x</span></tt> and whose output is <tt class="docutils literal"><span class="pre">y</span></tt>.</p>
+<p>Now, <tt class="docutils literal"><span class="pre">let-cells</span></tt> and <tt class="docutils literal"><span class="pre">let-cells*</span></tt> are, like <tt class="docutils literal"><span class="pre">define-cell</span></tt>,
+basically a convenience over doing the same thing in Scheme with
+<tt class="docutils literal"><span class="pre">let</span></tt>, <tt class="docutils literal"><span class="pre">let*</span></tt> and <tt class="docutils literal"><span class="pre">make-cell</span></tt>.  Also like <tt class="docutils literal"><span class="pre">define-cell</span></tt>,
+<tt class="docutils literal"><span class="pre">let-cells</span></tt> and <tt class="docutils literal"><span class="pre">let-cells*</span></tt> do constant conversion (so in
+<tt class="docutils literal"><span class="pre">(let-cells</span> <span class="pre">((x</span> <span class="pre">3))</span> <span class="pre">...)</span></tt>, <tt class="docutils literal"><span class="pre">x</span></tt> becomes a cell, not a Scheme
+object), and attach debugging information to the cells they bind.</p>
+<p>Since <tt class="docutils literal"><span class="pre">let-cells</span></tt> is plural (where <tt class="docutils literal"><span class="pre">let</span></tt> was number-neutral),
+Scheme-Propagators also define <tt class="docutils literal"><span class="pre">let-cell</span></tt> for the case when you just
+want to make one cell:</p>
+<pre class="literal-block">
+(let-cell x ...)              ==&gt;  (let-cells (x) ...)
+(let-cell (x (e:+ y z)) ...)  ==&gt;  (let-cells ((x (e:+ y z))) ...)
+</pre>
+<p>Scheme-Propagators currently has no analogues of Scheme's <tt class="docutils literal"><span class="pre">letrec</span></tt>
+or named <tt class="docutils literal"><span class="pre">let</span></tt> syntax.</p>
+<p>Finally, there is one more, somewhat sneaky way to make cells.
+The <tt class="docutils literal"><span class="pre">e&#64;</span></tt>
+procedure makes and returns a cell to hold the &quot;output&quot; of the
+propagator being applied.  These implicit cells are just
+like the implicit memory locations that Scheme creates under the hood
+for holding the return values of expressions before they get used by
+the next expression or assigned to variables.</p>
+</div>
+<div class="section" id="conditional-network-construction">
+<h2><a class="toc-backref" href="#id12">Conditional Network Construction</a></h2>
+<p>The <tt class="docutils literal"><span class="pre">switch</span></tt> propagator does conditional propagation --- it only
+forwards its input to its output if its control is <tt class="docutils literal"><span class="pre">#t</span></tt>.  As such,
+it serves the purpose of controlling the flow of data through an existing
+propagator network.  However, it is also appropriate to control the
+construction of more network, for example to design recursive networks
+that expand themselves no further than needed.  The basic idea here
+is to delay the construction of some chunk of network until
+some information appears on its boundary, and control whether
+said information appears by judicious use of <tt class="docutils literal"><span class="pre">switch</span></tt> propagators.  The
+low-level tools for accomplishing this effect are
+<tt class="docutils literal"><span class="pre">delayed-propagator-constructor</span></tt> and <tt class="docutils literal"><span class="pre">switch</span></tt>.  Scheme macros that
+do the right thing at a higher level are also provided:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">(p:when</span> <span class="pre">internal-cells</span> <span class="pre">condition-cell</span> <span class="pre">body</span> <span class="pre">...)</span></tt></dt>
+<dd>Delays the construction of the body until reason to believe the
+condition may be true appears in the condition-cell.  The
+<tt class="docutils literal"><span class="pre">condition-cell</span></tt> argument is an expression to evaluate to produce
+the cell controlling whether construction of the <tt class="docutils literal"><span class="pre">body</span></tt> takes
+place.  The <tt class="docutils literal"><span class="pre">body</span></tt> is an arbitrary collection of code, defining
+some amount of propagator network that will not be built until the
+controlling cell indicates that it should.  The <tt class="docutils literal"><span class="pre">internal-cells</span></tt>
+argument is a list of the free variables in <tt class="docutils literal"><span class="pre">body</span></tt>.  This is the
+same kind of kludge as the <tt class="docutils literal"><span class="pre">import</span></tt> clause in
+<tt class="docutils literal"><span class="pre">propagator-lambda</span></tt> (which see).</dd>
+<dt><tt class="docutils literal"><span class="pre">(e:when</span> <span class="pre">internal-cells</span> <span class="pre">condition-cell</span> <span class="pre">body</span> <span class="pre">...)</span></tt></dt>
+<dd>Expression-style variant of <tt class="docutils literal"><span class="pre">p:when</span></tt>.  Augments its boundary with
+a fresh cell, which is then synchronized with the cell returned from
+the last expression in <tt class="docutils literal"><span class="pre">body</span></tt> when <tt class="docutils literal"><span class="pre">body</span></tt> is constructed.</dd>
+</dl>
+<p><tt class="docutils literal"><span class="pre">(p:unless</span> <span class="pre">internal-cells</span> <span class="pre">condition-cell</span> <span class="pre">body</span> <span class="pre">...)</span></tt></p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">(e:unless</span> <span class="pre">internal-cells</span> <span class="pre">condition-cell</span> <span class="pre">body</span> <span class="pre">...)</span></tt></dt>
+<dd>Same as <tt class="docutils literal"><span class="pre">p:when</span></tt> and <tt class="docutils literal"><span class="pre">e:when</span></tt>, but reversing the sense of the
+control cell.</dd>
+<dt><tt class="docutils literal"><span class="pre">(p:if</span> <span class="pre">internal-cells</span> <span class="pre">condition-cell</span> <span class="pre">consequent</span> <span class="pre">alternate)</span></tt></dt>
+<dd>Two-armed conditional construction.  Just like two instances of
+<tt class="docutils literal"><span class="pre">p:when</span></tt>: constructs the network indicated by the consequent form
+when the condition-cell becomes possibly true, and constructs the
+network indicated by the alternate form when the condition-cell
+becomes possibly false.  Note that both can occur for the same
+<tt class="docutils literal"><span class="pre">p:if</span></tt> over the life of a single computation, for example if the
+condition-cell comes to have a TMS that includes a <tt class="docutils literal"><span class="pre">#t</span></tt> contingent
+on some premises and later a <tt class="docutils literal"><span class="pre">#f</span></tt> contingent on others.</dd>
+<dt><tt class="docutils literal"><span class="pre">(e:if</span> <span class="pre">internal-cells</span> <span class="pre">condition-cell</span> <span class="pre">consequent</span> <span class="pre">alternate)</span></tt></dt>
+<dd>Expression-style variant of <tt class="docutils literal"><span class="pre">p:if</span></tt>.</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="making-new-compound-propagators">
+<h1><a class="toc-backref" href="#id13">Making New Compound Propagators</a></h1>
+<p>So, you know the primitives (the supplied propagators) and the means
+of combination (how to make cells and wire bunches of propagators up
+into networks).  Now for the means of abstraction.  A propagator
+constructor such as <tt class="docutils literal"><span class="pre">p:+</span></tt> is like a wiring diagram with a few holes
+where it can be attached to other structures.  Supply <tt class="docutils literal"><span class="pre">p:+</span></tt> with
+cells, and it makes an actual propagator for addition whose inputs and
+outputs are those cells.  How do you make compound propagator
+constructors?</p>
+<p>The main way to abstract propagator construction is with the
+<tt class="docutils literal"><span class="pre">define-d:propagator</span></tt> and <tt class="docutils literal"><span class="pre">define-e:propagator</span></tt> Scheme macros.
+<tt class="docutils literal"><span class="pre">define-d:propagator</span></tt> defines a compound propagator in diagram style,
+that is, with explicit named parameters for the entire boundary of the
+compound:</p>
+<pre class="literal-block">
+(define-d:propagator (my-sum-constraint x y z)
+  (p:+ x y z)
+  (p:- z y x)
+  (p:- z x y))
+</pre>
+<p><tt class="docutils literal"><span class="pre">define-e:propagator</span></tt> defines a compound propagator in expression
+style, that is, expecting the body of the propagator to return one
+additional cell to add to the boundary at the end:</p>
+<pre class="literal-block">
+(define-e:propagator (double x)
+  (e:+ x x))
+</pre>
+<p>Both defining forms will make variants with names beginning in <tt class="docutils literal"><span class="pre">p:</span></tt>
+and <tt class="docutils literal"><span class="pre">e:</span></tt>, that default to being applied in diagram and expression
+style, respectively.  Note that this definition does not bind
+<tt class="docutils literal"><span class="pre">double</span></tt>.</p>
+<p>With these definitions we can use those pieces to build more complex
+structures:</p>
+<pre class="literal-block">
+(p:my-sum-constraint x (e:double x) z)
+</pre>
+<p>which can themselves be abstracted so that they can be used
+as if they were primitive:</p>
+<pre class="literal-block">
+(define-d:propagator (foo x z)
+  (p:my-sum-constraint x (e:double x) z))
+</pre>
+<p><tt class="docutils literal"><span class="pre">define-propagator</span></tt> is an alias for <tt class="docutils literal"><span class="pre">define-d:propagator</span></tt> because
+that's the most common use case.</p>
+<p>Just like in Scheme, the definition syntaxes have a corresponding
+syntax for anonymous compound propagators, <tt class="docutils literal"><span class="pre">lambda-d:propagator</span></tt> and
+<tt class="docutils literal"><span class="pre">lambda-e:propagator</span></tt>.</p>
+<p>Compound propagator constructors perform constant conversion:</p>
+<pre class="literal-block">
+(p:my-sum-constraint x 3 z)  ==  (p:my-sum-constraint x (e:constant 3) z)
+</pre>
+<p><tt class="docutils literal"><span class="pre">define-propagator</span></tt> and <tt class="docutils literal"><span class="pre">define-e:propagator</span></tt> respect the <tt class="docutils literal"><span class="pre">c:</span></tt>
+and <tt class="docutils literal"><span class="pre">ce:</span></tt> naming convention, in that if the name supplied for
+definition begins with <tt class="docutils literal"><span class="pre">c:</span></tt> or <tt class="docutils literal"><span class="pre">ce:</span></tt>, that pair of prefixes will
+be used in the names actually defined instead of <tt class="docutils literal"><span class="pre">p:</span></tt> and <tt class="docutils literal"><span class="pre">e:</span></tt>.
+So:</p>
+<pre class="literal-block">
+(define-propagator (foo ...) ...)     defines  p:foo and e:foo
+(define-propagator (p:foo ...) ...)   defines  p:foo and e:foo
+(define-propagator (e:foo ...) ...)   defines  p:foo and e:foo
+(define-propagator (c:foo ...) ...)   defines  c:foo and ce:foo
+(define-propagator (ce:foo ...) ...)  defines  c:foo and ce:foo
+</pre>
+<div class="section" id="lexical-scope">
+<h2><a class="toc-backref" href="#id14">Lexical Scope</a></h2>
+<p>Compound propagator definitions can be closed over cells available in
+their lexical environment:</p>
+<pre class="literal-block">
+(define-e:propagator (addn n)
+  (define-e:propagator (the-adder x)
+    (import n)
+    (e:+ n x))
+  e:the-adder)
+</pre>
+<p><tt class="docutils literal"><span class="pre">import</span></tt> is a kludge, which is a consequence of the embedding of
+Scheme-Propagators into Scheme.  Without enough access to the Scheme
+interpreter, or enough Bawden-compliant wizardry, we cannot detect the
+free variables in an expression, so they must be listed explicitly by
+the user.  Globally bound objects like <tt class="docutils literal"><span class="pre">e:+</span></tt> (and <tt class="docutils literal"><span class="pre">p:addn</span></tt> and
+<tt class="docutils literal"><span class="pre">e:addn</span></tt> if the above were evaluated at the top level) need not be
+mentioned.</p>
+</div>
+<div class="section" id="recursion">
+<h2><a class="toc-backref" href="#id15">Recursion</a></h2>
+<p>Propagator abstractions defined by <tt class="docutils literal"><span class="pre">define-propagator</span></tt> are expanded
+immediately when applied to cells.  Therefore, magic is needed to
+build recursive networks, because otherwise the structure would be
+expanded infinitely far.  As in Scheme, this magic is in <tt class="docutils literal"><span class="pre">if</span></tt>.  The
+Scheme-Propagators construct <tt class="docutils literal"><span class="pre">p:if</span></tt> (which is implemented as a
+Scheme macro) delays the construction of the diagrams in its branches
+until information is available about the predicate.  Specifically, the
+consequent is constucted only when there is good information to the
+effect that the predicate might be true, and the alternate is
+constructed only when there is good information to the effect that the
+predicate might be false.  Note that, unlike in Scheme, these can both
+occur to the same <tt class="docutils literal"><span class="pre">p:if</span></tt>.</p>
+<p>In Scheme-Propagators, the one-armed conditional construction
+construct <tt class="docutils literal"><span class="pre">p:when</span></tt> is more fundamental than the two-armed construct
+<tt class="docutils literal"><span class="pre">p:if</span></tt>.  This is because, where Scheme's <tt class="docutils literal"><span class="pre">if</span></tt> is about selecting
+values, and so has to have two options to select from, <tt class="docutils literal"><span class="pre">p:when</span></tt> and
+<tt class="docutils literal"><span class="pre">p:if</span></tt> are about building machinery, and there is no particular
+reason why choosing among two pieces of machinery to construct is any
+more basic than choosing whether or not to construct one particular
+piece.</p>
+<p>For example, here is the familiar recursive <tt class="docutils literal"><span class="pre">factorial</span></tt>, rendered in
+propagators with <tt class="docutils literal"><span class="pre">p:if</span></tt>:</p>
+<pre class="literal-block">
+(define-propagator (p:factorial n n!)
+  (p:if (n n!) (e:= 0 n)
+    (p:== 1 n!)
+    (p:== (e:* n (e:factorial (e:- n 1))) n!)))
+</pre>
+<p>The only syntactic difference between this and what one would write in
+Scheme for this same job is that this is written in diagram style,
+with an explicit name for the cell that holds the answer, and that
+<tt class="docutils literal"><span class="pre">p:if</span></tt> needs to be told the names of the non-global variables that
+are free in its branches, just like the <tt class="docutils literal"><span class="pre">import</span></tt> clause of a
+propagator definition (and for the same kludgerous reason).
+<tt class="docutils literal"><span class="pre">p:when</span></tt> is the one-armed version.  <tt class="docutils literal"><span class="pre">p:unless</span></tt> is also provided;
+it reverses the sense of the predicate.</p>
+<p>Like everything else whose name begins with <tt class="docutils literal"><span class="pre">p:</span></tt>, <tt class="docutils literal"><span class="pre">p:if</span></tt> and co
+have expression-style variants.  The difference is that the tail
+positions of the branches are expected to return cells, which are
+wired together and returned to the caller of the <tt class="docutils literal"><span class="pre">e:if</span></tt>.  Here is
+<tt class="docutils literal"><span class="pre">factorial</span></tt> again, in expression style:</p>
+<pre class="literal-block">
+(define-e:propagator (e:factorial n)
+  (e:if (n) (e:= 0 n)
+    1
+    (e:* n (e:factorial (e:- n 1)))))
+</pre>
+<p>Looks familiar, doesn't it?</p>
+</div>
+<div class="section" id="macrology">
+<h2><a class="toc-backref" href="#id16">Macrology</a></h2>
+<p>Sometimes you will need to make something that looks like a macro to
+Scheme-Propagators.  The macro language of Scheme-Propagators is
+Scheme.  For example:</p>
+<pre class="literal-block">
+(define (my-diagram x y z)
+  (p:+ x y z)
+  (p:- z y x)
+  (p:- z x y))
+</pre>
+<p><tt class="docutils literal"><span class="pre">my-diagram</span></tt> is a Scheme-Propagators macro that, when given three
+cells, wires up three arithmetic propagators to them.  This simple
+example of course gains nothing from being a macro rather
+than a normal compound propagator, but using Scheme as a macro
+language lets you do more interesting things:</p>
+<pre class="literal-block">
+(define (require-distinct cells)
+  (for-each-distinct-pair
+   (lambda (c1 c2)
+     (forbid (e:= c1 c2)))
+   cells))
+</pre>
+<p>This <tt class="docutils literal"><span class="pre">require-distinct</span></tt> uses a Scheme iterator to perform a
+repetitive task over a bunch of Scheme-Propagators cells.</p>
+<p>This is quite convenient, but sometimes one wants the debugging data
+provided by <tt class="docutils literal"><span class="pre">define-propagator</span></tt>.  This is what
+<tt class="docutils literal"><span class="pre">define-propagator-syntax</span></tt> is for.  Just change <tt class="docutils literal"><span class="pre">define</span></tt> to
+<tt class="docutils literal"><span class="pre">define-propagator-syntax</span></tt>:</p>
+<pre class="literal-block">
+(define-propagator-syntax (require-distinct cells)
+  (for-each-distinct-pair
+   (lambda (c1 c2)
+     (forbid (e:= c1 c2)))
+   cells))
+</pre>
+</div>
+</div>
+<div class="section" id="using-partial-information">
+<h1><a class="toc-backref" href="#id17">Using Partial Information</a></h1>
+<p>Partial, accumulatable information is essential to
+multidirectional, nonsequential programming.  Each &quot;memory
+location&quot; of Scheme-Propagators, that is each cell, maintains not &quot;a
+value&quot;, but &quot;all the information it has about a value&quot;.  Such
+information may be as little as &quot;I know absolutely nothing about my
+value&quot;, as much as &quot;I know everything there is to know about my value,
+and it is <tt class="docutils literal"><span class="pre">42</span></tt>&quot;, and many possible variations in between; and also
+one not-in-between variation, which is &quot;Stop the presses!  I know
+there is a contradiction!&quot;</p>
+<p>All these various possible states of information are represented (per
+force) as Scheme objects.  The Scheme object <tt class="docutils literal"><span class="pre">nothing</span></tt> represents
+the information &quot;I don't know anything&quot;.  This only takes a single
+Scheme object, because not knowing anything is a single state of
+knowledge.  Most Scheme objects represent &quot;perfect, consistent&quot;
+information: the Scheme object <tt class="docutils literal"><span class="pre">5</span></tt> represents the information &quot;I
+know everything there is to know, and the answer is <tt class="docutils literal"><span class="pre">5</span></tt>.&quot;  There are
+also several Scheme types provided with the system that denote
+specific other states of knowledge, and you can make your own.  For
+example, objects of type <tt class="docutils literal"><span class="pre">interval?</span></tt> contain an upper bound and a
+lower bound, and represent information of the form &quot;I know my value is
+between this real number and that one.&quot;</p>
+<p>The way to get partial knowledge into the network is to put it into
+cells with <tt class="docutils literal"><span class="pre">add-content</span></tt> or constant propagators.  For example:</p>
+<pre class="literal-block">
+(define-cell x (make-interval 3 5))
+</pre>
+<p>produces a cell named <tt class="docutils literal"><span class="pre">x</span></tt> that now holds the partial information
+<tt class="docutils literal"><span class="pre">(make-interval</span> <span class="pre">3</span> <span class="pre">5)</span></tt>, which means that its value is
+between <tt class="docutils literal"><span class="pre">3</span></tt> and <tt class="docutils literal"><span class="pre">5</span></tt>.</p>
+<p>Partial information structures are generally built to be contagious,
+so that once you've inserted a structure of a certain type into
+the network, the normal propagators will generally produce answers
+in kind, and, if needed, coerce their inputs into the right form
+to co-operate.  For example, if <tt class="docutils literal"><span class="pre">x</span></tt> has an interval like above,</p>
+<pre class="literal-block">
+(define-cell y (e:+ x 2))
+</pre>
+<p>will make an adder that will eventually need to add <tt class="docutils literal"><span class="pre">2</span></tt> to the
+interval between <tt class="docutils literal"><span class="pre">3</span></tt> and <tt class="docutils literal"><span class="pre">5</span></tt>.  This is a perfectly reasonable
+thing to ask, because both <tt class="docutils literal"><span class="pre">2</span></tt> and <tt class="docutils literal"><span class="pre">(make-interval</span> <span class="pre">3</span> <span class="pre">5)</span></tt> are
+states of knowledge about the inputs to that adder, so it ought to
+produce the best possible representation of the knowledge it can
+deduce about the result of the addition.  In this case, that would be
+the interval between <tt class="docutils literal"><span class="pre">5</span></tt> and <tt class="docutils literal"><span class="pre">7</span></tt>:</p>
+<pre class="literal-block">
+(run)
+(content y)  ==&gt;  #(interval 5 7)
+</pre>
+<p>The key thing about partial information is that it's
+cumulative.  So if you also added some other knowledge to the <tt class="docutils literal"><span class="pre">y</span></tt>
+cell, it would need to merge with the interval that's there to
+represent the complete knowledge available as a result:</p>
+<pre class="literal-block">
+(add-content y (make-interval 4 6))
+(content y)  ==&gt;  #(interval 5 6)
+</pre>
+<p>If incoming knowledge hopelessly contradicts the knowledge a cell
+already has, it will complain:</p>
+<pre class="literal-block">
+(add-content y 15)  ==&gt;  An error
+</pre>
+<p>stop the network mid-stride, and give you a chance to examine the
+situation so you can debug the program that led to it, using the
+standard MIT Scheme debugging facilities.</p>
+</div>
+<div class="section" id="built-in-partial-information-structures">
+<h1><a class="toc-backref" href="#id18">Built-in Partial Information Structures</a></h1>
+<ul class="simple">
+<li>nothing</li>
+<li>just a value</li>
+<li>intervals</li>
+<li>cons cells</li>
+<li>propagator cells</li>
+<li>closures</li>
+<li>supported values</li>
+<li>truth maintenance systems</li>
+<li>contradiction</li>
+</ul>
+<div class="section" id="nothing">
+<h2><a class="toc-backref" href="#id19">Nothing</a></h2>
+</div>
+<div class="section" id="a-raw-scheme-object">
+<h2><a class="toc-backref" href="#id20">A Raw Scheme Object</a></h2>
+<p>This state of information indicates that the content of the cell is
+completely known, and is exactly (by <tt class="docutils literal"><span class="pre">eqv?</span></tt>) that object.  Note:
+floating point numbers are compared by approximate numerical equality;
+this is guaranteed to screw you eventually, but we don't know how to
+do better.</p>
+</div>
+<div class="section" id="numerical-intervals">
+<h2><a class="toc-backref" href="#id21">Numerical Intervals</a></h2>
+<p>An object of type <tt class="docutils literal"><span class="pre">interval?</span></tt> has fields for a lower bound and an
+upper bound.  Such an object represents the information &quot;This value is
+between these bounds.&quot;  Cells merge intervals by intersecting them.</p>
+<dl class="docutils">
+<dt>(make-interval low high)</dt>
+<dd>Creates an interval with the given lower and upper bounds</dd>
+<dt>(interval-low interval)</dt>
+<dd>Extracts the lower bound of an interval</dd>
+<dt>(interval-high interval)</dt>
+<dd>Extracts the upper bound of an interval</dd>
+<dt>(interval? thing)</dt>
+<dd>Tests whether the given object is an interval</dd>
+</dl>
+<p>As an interval arithmetic facility, this one is very primitive.  In
+particular it assumes that all the numbers involved are positive.  The
+main purpose of including it is to have a partial information
+structure with an intuitive meaning, and that requires nontrivial
+operations on the information it is over.</p>
+</div>
+<div class="section" id="compound-data">
+<h2><a class="toc-backref" href="#id22">Compound Data</a></h2>
+<p>Scheme pairs are not assumed to denote exactly themselves.  A
+propagator cell will merge Scheme pairs by recursively merging the
+<tt class="docutils literal"><span class="pre">car</span></tt> and <tt class="docutils literal"><span class="pre">cdr</span></tt> fields.  The fields should contain further
+propagator cells; given the behavior of propagator cells as mergeable
+data, the effect will be unification.  A Scheme pair merged with a
+Scheme object of a different type will produce a contradiction.</p>
+<dl class="docutils">
+<dt>cons, car, cdr, pair?, null?</dt>
+<dd>These are Scheme procedures with their usual Scheme meanings.</dd>
+<dt>p:cons, e:cons, p:car, e:cdr, p:pair?, e:pair?, p:null?, e:null?</dt>
+<dd><p class="first">Propagators for dealing with compound data.  For example:</p>
+<pre class="literal-block">
+(p:cons x y z)
+</pre>
+<p class="last">puts a pair holding the cells <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> into cell <tt class="docutils literal"><span class="pre">z</span></tt>.</p>
+</dd>
+</dl>
+<dl class="docutils">
+<dt>::</dt>
+<dd><blockquote class="first">
+(p:car z w)</blockquote>
+<p class="last">ensures that the cell in the car of the pair in cell <tt class="docutils literal"><span class="pre">z</span></tt> is
+equivalent to cell <tt class="docutils literal"><span class="pre">w</span></tt>.</p>
+</dd>
+<dt>slotful-information-type</dt>
+<dd><p class="first">Declares that additional Scheme data structures should be merged
+the way pairs are.  For example:</p>
+<pre class="literal-block">
+(slotful-information-type pair? cons car cdr)
+</pre>
+<p class="last">is the declaration that causes the system to treat Scheme pairs the
+way it does.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="propagator-cells-as-partial-information">
+<h2><a class="toc-backref" href="#id23">Propagator Cells as Partial Information</a></h2>
+<p>Propagator cells merge with each other by attaching bidirectional
+identity propagators that keep the contents of the cells in sync.
+These identity propagators will cause the contents of the cells to
+merge, both now and in the future.</p>
+</div>
+<div class="section" id="closures">
+<h2><a class="toc-backref" href="#id24">Closures</a></h2>
+<p>Propagator closures as mergeable data behave like a compound data
+structure.  A closure is a code pointer together with an environment.
+The code pointer is a Scheme procedure; the environment is a map from
+names to cells, and as such is a compound structure containing cells.
+Code pointers merge by testing that they point to the same code
+(merging closures with different code produces a contradiction), and
+environments merge by merging all the cells they contain in
+corresponding places.</p>
+<dl class="docutils">
+<dt>make-closure, make-e:closure</dt>
+<dd>Scheme procedures for directly constructing closure objects.  The
+closures are defined in diagram or expression style, respectively.</dd>
+<dt>lambda-d:propagator, lambda-e:propagator</dt>
+<dd>Scheme-Propagators syntax for anonymous compound propagator
+constructors (which are implemented as closures).</dd>
+<dt>define-propagator</dt>
+<dd>Internally produces lambda-d:propagator or lambda-e:propagator
+and puts the results into appropriately named cells.</dd>
+</dl>
+</div>
+<div class="section" id="truth-maintenance-systems">
+<h2><a class="toc-backref" href="#id25">Truth Maintenance Systems</a></h2>
+<p>A Truth Maintenance System (TMS) is a kind of partial information
+structure that may appear in a cell.  A TMS is a set of contingent
+values.  A contingent value is any partial information object that
+describes the &quot;value&quot; in the cell, together with a set of premises.
+The premises are Scheme objects that have no interesting properties
+except identity (by <tt class="docutils literal"><span class="pre">eq?</span></tt>).  A worldview defines which premises are
+believed.</p>
+<p>The meaning of a TMS as information is the logical <tt class="docutils literal"><span class="pre">and</span></tt> of the
+meanings of all of its contingent values.  The meaning of each
+contingent value is an implication: The conjunction of the premises
+implies the contingent information.  Therefore, given a worldview,
+some of the contingent information is believed and some is not.  If
+the TMS is queried, it produces the best summary it can of the
+believed information, together with the full set of premises that
+information is contingent upon.</p>
+<p>In this system, there is a single current global worldview, which
+starts out believing all premises.  The worldview may be changed to
+exclude (or re-include) individual premises, allowing the user to
+examine the consequences of different consistent subsets of premises.</p>
+<dl class="docutils">
+<dt>(kick-out! premise)</dt>
+<dd>Remove the given premise from the current worldview.</dd>
+<dt>(bring-in! premise)</dt>
+<dd>Return the given premise to the current worldview.</dd>
+<dt>(premise-in? premise)</dt>
+<dd>Is the given premise believed in the current worldview?</dd>
+<dt>(contingent info premises)</dt>
+<dd>Constructs a contingency object representing the information
+that the given info is contingent on the given list of premises.</dd>
+<dt>(contingent-info contingency-object)</dt>
+<dd>The information that is contingent.</dd>
+<dt>(contingent-premises contingency-object)</dt>
+<dd>The list of premises on which that information is contingent.</dd>
+<dt>(contingency-object-believed? contingency-object)</dt>
+<dd>Whether the given contingency object is believed.</dd>
+<dt>(make-tms contingency-object-list)</dt>
+<dd>Constructs a TMS with the given contingency objects as its initial
+set.</dd>
+<dt>(tms-query tms)</dt>
+<dd>Returns a contingency object representing the strongest deduction
+the given TMS can make in the current worldview.  tms-query gives
+the contingency with the strongest contingent information that is
+believed in the current worldview.  Given that desideratum,
+tms-query tries to minimize the premises that information is
+contingent upon.</dd>
+</dl>
+<p>Calling <tt class="docutils literal"><span class="pre">initialize-scheduler</span></tt> resets the worldview to believing all
+premises.</p>
+<p>TMSes merge by appending their lists of known contingencies (and
+sweeping out redundant ones).  Usually, propagators react to TMSes by
+querying them to obtain ingredients for computation.  The result of a
+computation is contingent on the premises of the ingredients that
+contribute to that result.</p>
+</div>
+<div class="section" id="contradiction">
+<h2><a class="toc-backref" href="#id26">Contradiction</a></h2>
+<p>The Scheme object <tt class="docutils literal"><span class="pre">the-contradiction</span></tt> represents a completely
+contradictory state of information.  If a cell ever finds itself in
+such a completely contradictory state, it will signal an error.  The
+explicit <tt class="docutils literal"><span class="pre">the-contradiction</span></tt> object is useful, however, for
+representing contradictory information in recursive contexts.  For
+example, a truth maintenance system may discover that some collection
+of premises leads to a contradiction --- this is represented by a
+<tt class="docutils literal"><span class="pre">the-contradiction</span></tt> object contingent on those premises.</p>
+</div>
+<div class="section" id="implicit-dependency-directed-search">
+<h2><a class="toc-backref" href="#id27">Implicit Dependency-Directed Search</a></h2>
+<p>If a cell discovers that it contains a TMS that harbors a contingent
+contradiction, the cell will signal that the premises of that
+contradiction form a nogood set, and that nogood set will be recorded.
+For the worldview to be consistent, at least one of those premises
+must be removed.  The system maintains the invariant that the current
+worldview never has a subset which is a known nogood.</p>
+<p>If a nogood set consists entirely of user-introduced premises, the
+computation will be suspended, a description of the nogood set will be
+printed, and the user will have the opportunity to remove an offending
+premise (with <tt class="docutils literal"><span class="pre">kick-out!</span></tt>) and, if desired, resume the computation
+(with <tt class="docutils literal"><span class="pre">run</span></tt>).</p>
+<p>There is also a facility for introducing hypothetical premises that
+the system is free to manipulate automatically.  If a nogood set
+contains at least one hypothetical, some hypothetical from that nogood
+set will be retracted, and the computation will proceed.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">(p:amb</span> <span class="pre">cell)</span></tt>, <tt class="docutils literal"><span class="pre">(e:amb)</span></tt></dt>
+<dd>A propagator that emits a TMS consisting of a pair of contingencies.
+One contains the information <tt class="docutils literal"><span class="pre">#t</span></tt> contingent on one fresh
+hypothetical premise, and the other contains the information <tt class="docutils literal"><span class="pre">#f</span></tt>
+contingent on anther.  <tt class="docutils literal"><span class="pre">amb</span></tt> also tries to maintain the invariant
+that exactly one of those premises is believed.  If the current
+worldview is such that bringing either premise in will cause a known
+nogood set to be believed, then, by performing a cut, the <tt class="docutils literal"><span class="pre">amb</span></tt>
+discovers and signals a new nogood set that does not include either
+of them.  Together with the reaction of the system to nogood sets,
+this induces an emergent satisfiability solver by the resolution
+principle.</dd>
+<dt><tt class="docutils literal"><span class="pre">(p:require</span> <span class="pre">cell)</span></tt>, <tt class="docutils literal"><span class="pre">(e:require)</span></tt></dt>
+<dd>A propagator that requires its given cell to be true (to wit,
+signals contradictions if it is not).</dd>
+<dt><tt class="docutils literal"><span class="pre">(p:forbid</span> <span class="pre">cell)</span></tt>, <tt class="docutils literal"><span class="pre">(e:forbid)</span></tt></dt>
+<dd>A propagator that forbids its given cell from being true (to wit,
+signals contradictions if it is).</dd>
+<dt><tt class="docutils literal"><span class="pre">(p:one-of</span> <span class="pre">input</span> <span class="pre">...</span> <span class="pre">output)</span></tt>, <tt class="docutils literal"><span class="pre">(e:one-of</span> <span class="pre">input</span> <span class="pre">...)</span></tt></dt>
+<dd>An n-ary version of <tt class="docutils literal"><span class="pre">amb</span></tt>.  Picks one of the objects in the given
+input cells using an appropriate collection of <tt class="docutils literal"><span class="pre">amb</span></tt> propagators
+and puts it into its output cell.</dd>
+<dt><tt class="docutils literal"><span class="pre">(require-distinct</span> <span class="pre">cells)</span></tt></dt>
+<dd>Requires all of the objects in its list of input cells to be
+distinct (in the sense of <tt class="docutils literal"><span class="pre">eqv?</span></tt>)</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="making-new-kinds-of-partial-information">
+<h1><a class="toc-backref" href="#id28">Making New Kinds of Partial Information</a></h1>
+<p>The partial information types are defined by a suite of generic
+operations.  The critical ones for defining the actual partial
+information types are <tt class="docutils literal"><span class="pre">equivalent?</span></tt>, <tt class="docutils literal"><span class="pre">merge</span></tt>, and
+<tt class="docutils literal"><span class="pre">contradictory?</span></tt>, which test whether two information structures
+represent the same information, merge given information structures,
+and test whether a given information structure represents an
+impossible state, respectively.  In addition, the primitive
+propagators are equipped with generic operations for giving them
+custom behaviors on the various information structures, and the
+generic operation <tt class="docutils literal"><span class="pre">binary-map</span></tt> is very useful for the circumstance
+when a whole class of propagators should handle a particular
+information type uniformly.</p>
+<p>To create your own partial information structure, you should create an
+appropriate Scheme data structure to represent it, and then add
+handlers to the operations <tt class="docutils literal"><span class="pre">equivalent?</span></tt>, <tt class="docutils literal"><span class="pre">merge</span></tt>, and
+<tt class="docutils literal"><span class="pre">contradictory?</span></tt> to define that data structure's interpretation as
+information.  In order to do anything useful with your new information
+structure, you will also need to make sure that the propagators you
+intend to use with it can deal with it appropriately.  You can of
+course create custom propagators that handle your partial information
+structure.  Standard generic operations are also provided for
+extending the built-in primitive propagators to handle new partial
+information types.  Compound propagators are a non-issue because they
+will just pass the relevant structures around to the appropriate
+primitives.</p>
+<p>It is also important to make sure that your new partial information
+structure intermixes and interoperates properly with the existing
+ones (see Built-in Partial Information Structures).</p>
+<p>Method addition in the generic operation system used in
+Scheme-Propagators is done with the <tt class="docutils literal"><span class="pre">defhandler</span></tt> procedure:</p>
+<pre class="literal-block">
+(defhandler operation handler arg-predicate ...)
+</pre>
+<p>The generic operations system is a predicate dispatch system.  Every
+handler is keyed by a bunch of predicates that must accept the
+arguments to the generic procedure in turn; if they do, that handler
+is invoked.  For example, merging two intervals with each other
+can be defined as:</p>
+<pre class="literal-block">
+(defhandler merge intersect-intervals interval? interval?)
+</pre>
+<p>You can also define your own generic operations, but that is not
+relevant here.  TODO Add a pointer to documentation of the generic
+operations system, including defining generics, precedence of
+handlers, and tagging procedures as type testers for performance;
+also use of SOS specializers as predicates directly.
+Also the coersion subsystem?</p>
+<div class="section" id="an-example-adding-interval-arithmetic">
+<h2><a class="toc-backref" href="#id29">An Example: Adding Interval Arithmetic</a></h2>
+<p>The first step is to define a data structure to represent an interval.
+Intervals have upper and lower bounds, so a Scheme record structure
+with constructor <tt class="docutils literal"><span class="pre">make-interval</span></tt>, accessors <tt class="docutils literal"><span class="pre">interval-low</span></tt> and
+<tt class="docutils literal"><span class="pre">interval-high</span></tt>, and predicate <tt class="docutils literal"><span class="pre">interval?</span></tt> will do.</p>
+<p>The second step is to define handlers for the generic operations that
+every partial information structure must implement.  Assuming
+appropriate procedures for intersecting intervals and for testing them
+for equality and emptiness, those handlers would be:</p>
+<pre class="literal-block">
+(defhandler equivalent? interval-equal? interval? interval?)
+(defhandler merge intersect-intervals interval? interval?)
+(defhandler contradictory? empty-interval? interval?)
+</pre>
+<p>To make intervals interoperate with numbers in the same network,
+we can add a few more handlers:</p>
+<pre class="literal-block">
+(define (number=interval? number interval)
+  (= number (interval-low interval) (interval-high interval)))
+(defhandler equivalent? number=interval? number? interval?)
+(defhandler equivalent? (binary-flip number=interval?) interval? number?)
+
+(define (number-in-interval number interval)
+  (if (&lt;= (interval-low interval) number (interval-high interval))
+      number
+      the-contradiction))
+(defhandler merge number-in-interval number? interval?)
+(defhandler merge (binary-flip number-in-interval) interval? number?)
+</pre>
+<p>The third step is to teach the arithmetic propagators to handle
+intervals.  Interval arithmetic does not fit into the <tt class="docutils literal"><span class="pre">binary-map</span></tt>
+worldview (which see below), so the only way to do intervals is to
+individually add the appropriate handlers to the generic procedures
+underlying the primitive propagators:</p>
+<pre class="literal-block">
+(defhandler generic-+ add-interval interval? interval?)
+(defhandler generic-- sub-interval interval? interval?)
+(defhandler generic-* mul-interval interval? interval?)
+(defhandler generic-/ div-interval interval? interval?)
+(defhandler generic-sqrt sqrt-interval interval?)
+;; ...
+</pre>
+<p>In order for the binary propagators to handle the situation where that
+propagator has an interval on one input and a number on the other,
+further handlers need to be added that tell it what to do in those
+circumstances.  The generic procedure system has been extended
+with support for automatic coercions for this purpose.</p>
+</div>
+<div class="section" id="generic-coercions">
+<h2><a class="toc-backref" href="#id30">Generic Coercions</a></h2>
+<p>Every number can be seen as an interval (whose lower and upper bounds
+are equal).  The definition of arithmetic on mixed intervals and
+numbers can be deduced from the definitions of arithmetic on just
+intervals, arithmetic on just numbers, and this procedure for viewing
+numbers as intervals.  The generic operations system provided with
+Scheme-Propagators has explicit support for this idea.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">(declare-coercion-target</span> <span class="pre">type</span> <span class="pre">[</span> <span class="pre">default-coercion</span> <span class="pre">])</span></tt></dt>
+<dd><p class="first">This is a Scheme macro that expands into the definitions needed to
+declare <tt class="docutils literal"><span class="pre">type</span></tt> as something that other objects may be coerced
+into.  If supplied, it also registers a default coercion from
+anything declared coercible to <tt class="docutils literal"><span class="pre">type</span></tt>.</p>
+<p><tt class="docutils literal"><span class="pre">declare-coercion-target</span></tt> defines the procedure <tt class="docutils literal"><span class="pre">type-able?</span></tt>,
+which tests whether a given object has been declared to be coercible
+to <tt class="docutils literal"><span class="pre">type</span></tt>, and the procedure <tt class="docutils literal"><span class="pre">-&gt;type</span></tt>, which does that coercion.
+These rely on the type-tester for <tt class="docutils literal"><span class="pre">type</span></tt> already being defined and
+named <tt class="docutils literal"><span class="pre">type?</span></tt>.  For example:</p>
+<pre class="literal-block">
+(declare-coercion-target interval)
+</pre>
+<p class="last">relies on the procedure <tt class="docutils literal"><span class="pre">interval?</span></tt> and defines the procedures
+<tt class="docutils literal"><span class="pre">-&gt;interval</span></tt> and <tt class="docutils literal"><span class="pre">interval-able?</span></tt>.  This call does not declare a
+default means of coercing arbitrary objects into intervals.</p>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">(declare-coercion</span> <span class="pre">from-type</span> <span class="pre">to-coercer</span> <span class="pre">[</span> <span class="pre">mechanism</span> <span class="pre">])</span></tt></dt>
+<dd><p class="first">Declares that the given <tt class="docutils literal"><span class="pre">from-type</span></tt> is coercible by the given
+coercer operation, either by the given <tt class="docutils literal"><span class="pre">mechanism</span></tt> if supplied or
+by the default mechanism declared in the definition of the given
+coercer.  For example:</p>
+<pre class="literal-block">
+(declare-coercion number? -&gt;interval (lambda (x) (make-interval x x)))
+</pre>
+<p class="last">declares that Scheme number objects may be coerced to intervals
+whose lower and upper bounds are equal to that number.  After this
+declaration, <tt class="docutils literal"><span class="pre">interval-able?</span></tt> will return true on numbers, and
+<tt class="docutils literal"><span class="pre">-&gt;interval</span></tt> will make intervals out of numbers.</p>
+</dd>
+<dt><tt class="docutils literal"><span class="pre">(defhandler-coercing</span> <span class="pre">operation</span> <span class="pre">handler</span> <span class="pre">coercer)</span></tt></dt>
+<dd><p class="first">The given generic operation must be binary.  Defines handlers for
+the given generic operation that have two effects: <tt class="docutils literal"><span class="pre">handler</span></tt> is
+invoked if that operation is given two arguments of the type
+corresponding to <tt class="docutils literal"><span class="pre">coercer</span></tt>; and if one argument is of that type
+and the other has been declared coercable to that type it will be so
+coerced, and then handler will be invoked.  For example:</p>
+<pre class="literal-block">
+(defhandler-coercing generic-+ add-interval -&gt;interval)
+</pre>
+<p>declares that intervals should be added by <tt class="docutils literal"><span class="pre">add-interval</span></tt>, and
+that anything <tt class="docutils literal"><span class="pre">interval-able?</span></tt> can be added to an interval by
+first coercing it into an interval with <tt class="docutils literal"><span class="pre">-&gt;interval</span></tt> and then
+doing <tt class="docutils literal"><span class="pre">add-interval</span></tt>.  This subsumes</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd>(defhandler generic-+ add-interval interval? interval?)</dd>
+</dl>
+<p class="last"><tt class="docutils literal"><span class="pre">defhandler-coercing</span></tt> may only be called after a call to
+<tt class="docutils literal"><span class="pre">declare-coercion-target</span></tt> defining the appropriate coercer and
+coercability tester procedures (but the various specific coercions
+may be declared later).</p>
+</dd>
+</dl>
+<p>TODO Describe declare-type-tester?</p>
+</div>
+<div class="section" id="the-partial-information-generics">
+<h2><a class="toc-backref" href="#id31">The Partial Information Generics</a></h2>
+<p><tt class="docutils literal"><span class="pre">(equivalent?</span> <span class="pre">info1</span> <span class="pre">info2)</span>&nbsp; <span class="pre">==&gt;</span>&nbsp; <span class="pre">#t</span> <span class="pre">or</span> <span class="pre">#f</span></tt></p>
+<p>The <tt class="docutils literal"><span class="pre">equivalent?</span></tt> procedure is used by cells to determine whether
+their content has actually changed after an update.  Its job is to
+ascertain, for any two partial information structures, whether they
+represent the same information.  As a fast path, any two <tt class="docutils literal"><span class="pre">eqv?</span></tt>
+objects are assumed to represent equivalent information structures.
+The default operation on <tt class="docutils literal"><span class="pre">equivalent?</span></tt> returns false for any two
+non-<tt class="docutils literal"><span class="pre">eqv?</span></tt> objects.</p>
+<p>A handler for <tt class="docutils literal"><span class="pre">equivalent?</span></tt> is expected to accept two partial
+information structures and return <tt class="docutils literal"><span class="pre">#t</span></tt> if they represent
+semantically the same information, and <tt class="docutils literal"><span class="pre">#f</span></tt> if they do not.</p>
+<p>The built-in <tt class="docutils literal"><span class="pre">equivalent?</span></tt> determines an equivalence relation.
+Extensions to it must maintain this invariant.</p>
+<p><tt class="docutils literal"><span class="pre">(merge</span> <span class="pre">info1</span> <span class="pre">info2)</span>&nbsp; <span class="pre">==&gt;</span>&nbsp; <span class="pre">new-info</span></tt></p>
+<p>The <tt class="docutils literal"><span class="pre">merge</span></tt> procedure is the key to the propagation idea.  Its job
+is to take any two partial information structures, and produce a new
+one that represents all the information present in both of the
+input structures.  This happens every time a propagator gives a cell
+some new information.  Any two <tt class="docutils literal"><span class="pre">equivalent?</span></tt> information structures
+merge to identically the first of them.  The default operation for
+<tt class="docutils literal"><span class="pre">merge</span></tt> on a pair of non-<tt class="docutils literal"><span class="pre">equivalent?</span></tt> structures that the handlers for
+<tt class="docutils literal"><span class="pre">merge</span></tt> do not recognize is to assume that they cannot be usefully
+merged, and return <tt class="docutils literal"><span class="pre">the-contradiction</span></tt>.</p>
+<p>A handler for <tt class="docutils literal"><span class="pre">merge</span></tt> is exptected to accept two partial
+information structures and return another partial information
+structure that semantically includes all the information present in
+both input structures.  The handler may return
+<tt class="docutils literal"><span class="pre">the-contradiction</span></tt> to indicate that the two given partial
+information structures are completely mutually exclusive.</p>
+<p><tt class="docutils literal"><span class="pre">merge</span></tt> is expected to determine a (semi-)lattice (up to equivalence
+by <tt class="docutils literal"><span class="pre">equivalent?</span></tt>).  That is</p>
+<ul>
+<li><p class="first">associativity:</p>
+<pre class="literal-block">
+(merge X (merge Y Z))  ~  (merge (merge X Y) Z)
+(equivalent? (merge X (merge Y Z)) (merge (merge X Y) Z)) ==&gt; #t
+</pre>
+</li>
+<li><p class="first">commutativity:</p>
+<pre class="literal-block">
+(merge X Y)  ~  (merge Y X)
+(equivalent? (merge X Y) (merge Y X)) ==&gt; #t
+</pre>
+</li>
+<li><p class="first">idempotence:</p>
+<pre class="literal-block">
+(X ~ Y) implies (X ~ (merge X Y))
+(or (not (equivalent? X Y)) (equivalent? X (merge X Y))) ==&gt; #t
+</pre>
+</li>
+</ul>
+<p><tt class="docutils literal"><span class="pre">(contradictory?</span> <span class="pre">info)</span>&nbsp; <span class="pre">==&gt;</span>&nbsp; <span class="pre">#t</span> <span class="pre">or</span> <span class="pre">#f</span></tt></p>
+<p>The <tt class="docutils literal"><span class="pre">contradictory?</span></tt> procedure tests whether a given information
+structure represents an impossible situation.  <tt class="docutils literal"><span class="pre">contradictory?</span></tt>
+states of information may arise in the computation without causing
+errors.  For example, a TMS (which see) may contain a contradiction in
+a contingent context, without itself being <tt class="docutils literal"><span class="pre">contradictory?</span></tt>.  But if
+a <tt class="docutils literal"><span class="pre">contradictory?</span></tt> object gets to the top level, that is if a cell
+discovers that it directly contains a <tt class="docutils literal"><span class="pre">contradictory?</span></tt> state of
+information, it will signal an error and stop the computation.</p>
+<p>A handler for <tt class="docutils literal"><span class="pre">contradictory?</span></tt> is expected to accept a partial
+information structure, and to return <tt class="docutils literal"><span class="pre">#t</span></tt> if it represents an
+impossible situation (such as an empty interval) or <tt class="docutils literal"><span class="pre">#f</span></tt> if it does
+not.</p>
+<p>TODO Make sure that all the behavior of all built-in partial
+information structures under all the given generics is duly
+documented.</p>
+<div class="section" id="the-full-story-on-merge">
+<h3><a class="toc-backref" href="#id32">The Full Story on Merge</a></h3>
+<p>The description of <tt class="docutils literal"><span class="pre">merge</span></tt> as always returning a new partial
+information structure is an approximation.  Sometimes, <tt class="docutils literal"><span class="pre">merge</span></tt> may
+return a new partial information structure together with instructions
+for an additional effect that needs to be carried out.  For example,
+when merging two propagator cells (see Cells as Partial Information),
+the new information is just one of those cells, but the two cells also
+need to be connected with propagators that will synchronize their
+contents.  For another example, in Scheme-Propagators, if a merge
+produces a TMS (which see) that contains a contingent contradiction,
+the premises that contradiction depends upon must be signalled as a
+nogood set (that this requires signalling and is not just another
+partial information structure is a consequence of an implementation
+decision of TMSes in Scheme-Propagators).</p>
+<p>The fully nuanced question that <tt class="docutils literal"><span class="pre">merge</span></tt> answers is</p>
+<blockquote>
+&quot;What do I need to do to the network in order to make it reflect
+the discovery that these two information structures are about the
+same object?&quot;</blockquote>
+<p>In the common case, the answer to this question is going to be
+&quot;Record: that object is best described by this information structure&quot;.
+This answer is represented by returning the relevant information
+structure directly.  Another possible answer is &quot;These two information
+structures cannot describe the same object.&quot;  This answer is
+represented by returning <tt class="docutils literal"><span class="pre">the-contradiction</span></tt>.  Other answers, such
+as &quot;Record this information structure and connect these two cells with
+synchronizing propagators&quot;, are represented by the <tt class="docutils literal"><span class="pre">effectful</span></tt> data
+structure, which has one field for a new partial information structure
+to record, and one field for a list of other effects to carry out.
+These instructions are represented as explicit objects returned from
+<tt class="docutils literal"><span class="pre">merge</span></tt> rather than being carried out directly because this allows
+recursive calls to <tt class="docutils literal"><span class="pre">merge</span></tt> to modify the effects to account for the
+context in which that <tt class="docutils literal"><span class="pre">merge</span></tt> occurs.  For example, if a merge of
+two cells occurs in a contingent context inside a merge of two
+TMSes, then the instructions to connect those two cells must be
+adjusted to make the connection also contingent on the appropriate
+premises.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">(make-effectful</span> <span class="pre">info</span> <span class="pre">effects)</span></tt></dt>
+<dd>Constructs a new effectful result of merge, with the given new
+partial information structure and the given list of effects to carry
+out.  If the resulting effectful object reaches the top level in a
+cell, those effects will be executed in the order they appear in the
+list.</dd>
+<dt><tt class="docutils literal"><span class="pre">(effectful-info</span> <span class="pre">effectful)</span></tt></dt>
+<dd>Returns the new information content carried in the given
+effectful object.</dd>
+<dt><tt class="docutils literal"><span class="pre">(effectful-effects</span> <span class="pre">effectful)</span></tt></dt>
+<dd>Returns the list of effects that this effectful object carries.</dd>
+<dt><tt class="docutils literal"><span class="pre">(effectful?</span> <span class="pre">thing)</span></tt></dt>
+<dd>Tells whether the given object is an effectful object.</dd>
+<dt><tt class="docutils literal"><span class="pre">(-&gt;effectful</span> <span class="pre">thing)</span></tt></dt>
+<dd>Coerces a possibly-effectless information structure into an
+effectful object.  If the <tt class="docutils literal"><span class="pre">thing</span></tt> was already effectful,
+returns it, otherwise wraps it into an effectful object
+with an empty list of effects.</dd>
+<dt><tt class="docutils literal"><span class="pre">(effectful-&gt;</span> <span class="pre">effectful)</span></tt></dt>
+<dd>Attempts to coerce an effectful object into an explicitly effectless
+one.  If the given effectful object was not carrying any effects
+that would have any effect when executed, returns just the
+information structure it was carrying.  Otherwise, returns
+the given effectful object.</dd>
+<dt><tt class="docutils literal"><span class="pre">(effectful-bind</span> <span class="pre">effectful</span> <span class="pre">func)</span></tt></dt>
+<dd>Runs the given <tt class="docutils literal"><span class="pre">func</span></tt> on the information content in the given
+<tt class="docutils literal"><span class="pre">effectful</span></tt> object, and reattaches any effects.  The effectful
+object may actually be a partial information structure without
+explicit effects.  The func may return a new partial information
+structure or a new effectful object.  The overall result of
+<tt class="docutils literal"><span class="pre">effectful-bind</span></tt> is the information returned by the call to
+<tt class="docutils literal"><span class="pre">func</span></tt>, together with all the effects in the original effectful
+object, and any effects in the return value of the <tt class="docutils literal"><span class="pre">func</span></tt>.  The
+former effects are listed first.</dd>
+<dt><tt class="docutils literal"><span class="pre">(effectful-list-bind</span> <span class="pre">effectfuls</span> <span class="pre">func)</span></tt></dt>
+<dd>Like <tt class="docutils literal"><span class="pre">effectful-bind</span></tt>, but accepts a list of effectful objects,
+and calls the <tt class="docutils literal"><span class="pre">func</span></tt> on the list of their information contents.</dd>
+</dl>
+<p>There are two reasons why this matters to a user of the system.
+First, callers of <tt class="docutils literal"><span class="pre">merge</span></tt> (for example recursive ones in contexts
+where a new partial information structure is defined that may contain
+arbitrary other ones) must be aware that <tt class="docutils literal"><span class="pre">merge</span></tt> may return an
+<tt class="docutils literal"><span class="pre">effectful</span></tt> object.  In this case, it is the resposibility of the
+caller to <tt class="docutils literal"><span class="pre">merge</span></tt> to shepherd the effects appropriately, adjusting
+them if necessary.  For example, the <tt class="docutils literal"><span class="pre">merge</span></tt> handler for two pairs
+recursively merges the cars and cdrs of the pairs.  If either of those
+recursive merges produces effects, the pair merge forwards all of
+them.  Here is the code that does that:</p>
+<pre class="literal-block">
+(define (pair-merge pair1 pair2)
+  (effectful-bind (merge (car pair1) (car pair2))
+    (lambda (car-answer)
+      (effectful-bind (merge (cdr pair1) (cdr pair2))
+        (lambda (cdr-answer)
+          (cons car-answer cdr-answer))))))
+
+(defhandler merge pair-merge pair? pair?)
+</pre>
+<p>N.B.: The car merge and the cdr merge may both produce effects.  If
+so, these effects will be executed in FIFO order, that is, car effects
+first, then cdr effects.  This order is an arbitrary decision that we
+as the designers of Scheme-Propagators are not committed to.  All
+effects built into Scheme-Propagators are independent, in that their
+executions commute.</p>
+<p>Scheme-Propagators has two built-in effect types:
+<tt class="docutils literal"><span class="pre">cell-join-effect</span></tt>, defined in <tt class="docutils literal"><span class="pre">core/cells.scm</span></tt>, instructs the
+system to make sure two cells are joined by synchronizing propagators;
+<tt class="docutils literal"><span class="pre">nogood-effect</span></tt>, defined in <tt class="docutils literal"><span class="pre">core/contradictions.scm</span></tt>, instructs
+the system to record that a list of premises constitutes a nogood set.
+(The error that the system signals when discovering a toplevel
+contradiction is not an effect in this sense).</p>
+<p>Second, a new partial information structure may want to have some
+side-effect when merged.  This must be accomplished through returning
+an appropriate <tt class="docutils literal"><span class="pre">effectful</span></tt> object containing appropriate
+instructions.  New types of effects can be defined for that purpose.
+For example, the built-in TMSes are added to the system through this
+mechanism.</p>
+<p>The handling of effects is extensible through two generic procedures.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">(execute-effect</span> <span class="pre">effect)</span></tt></dt>
+<dd>The <tt class="docutils literal"><span class="pre">execute-effect</span></tt> procedure is used by cells to actually
+execute any effects that reach the top level.  A handler for
+<tt class="docutils literal"><span class="pre">execute-effect</span></tt> should execute the effect specified by the given
+effect object.  The return value of <tt class="docutils literal"><span class="pre">execute-effect</span></tt> is not used.</dd>
+<dt><tt class="docutils literal"><span class="pre">(redundant-effect?</span> <span class="pre">effect)</span>&nbsp; <span class="pre">==&gt;</span>&nbsp; <span class="pre">#t</span> <span class="pre">or</span> <span class="pre">#f</span></tt></dt>
+<dd><p class="first">The <tt class="docutils literal"><span class="pre">redundant-effect?</span></tt> procedure is used to determine which
+effects will predictably have no effect if executed, so they may be
+removed.  For example, synchronizing a cell to itself, or
+synchronizing two cells that are already synchronized, are redundant
+effects.  Detecting redundant effects is important for testing
+network quiescence.</p>
+<p class="last">The default operation of <tt class="docutils literal"><span class="pre">redundant-effect?</span></tt> is to return <tt class="docutils literal"><span class="pre">#f</span></tt>
+for all effects, which is conservative but could lead to excess
+computation in the network.  A handler for <tt class="docutils literal"><span class="pre">redundant-effect?</span></tt> is
+expected to return <tt class="docutils literal"><span class="pre">#t</span></tt> if the effect will provably have no
+consequence on any values to be computed in the future, or <tt class="docutils literal"><span class="pre">#f</span></tt> if
+the effect may have consequences.</p>
+</dd>
+</dl>
+<p>If an effect is generated by a <tt class="docutils literal"><span class="pre">merge</span></tt> that occurs in a contingent
+context in a TMS, the TMS will modify the effect to incorporate the
+contingency.  This mechanism is also extensible.  To teach TMSes
+about making new effects contingent, add handlers to the generic
+operation <tt class="docutils literal"><span class="pre">generic-attach-premises</span></tt>.</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">((generic-attach-premises</span> <span class="pre">effect)</span> <span class="pre">premises)</span>&nbsp; <span class="pre">==&gt;</span>&nbsp; <span class="pre">new-effect</span></tt></dt>
+<dd>The <tt class="docutils literal"><span class="pre">generic-attach-premises</span></tt> procedure is used by the TMS
+machinery to modify effects produced by merges of contingent
+information.  A handler for <tt class="docutils literal"><span class="pre">generic-attach-premises</span></tt> must return
+a procedure that will accept a list of premises and return a new
+effect, which represents the same action but appropriately
+contingent on those premises.  In particular, the consequences of
+the action must be properly undone or made irrelevant if any
+premises supporting that action are retracted.  For example, the
+instruction to join two cells by synchronizing propagators is made
+contingent on premises by causing those synchronizing propagators to
+synchronize contingently.</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="individual-propagator-generics">
+<h2><a class="toc-backref" href="#id33">Individual Propagator Generics</a></h2>
+<p>Most primitive propagators are actually built from generic Scheme functions.
+Those propagators can therefore be extended to new
+partial information types just by adding appropriate methods to their
+generic operations.  This is what we did in the interval example.
+Don't forget to teach the propagators what to do if they encounter
+your partial information structure on one input and a different one on
+another --- if both represent states of knowledge about compatible
+ultimate values, it should be possible to produce a state of knowledge
+about the results of the computation (though in extreme cases that
+state of knowledge might be <tt class="docutils literal"><span class="pre">nothing</span></tt>, implying no new information
+produced by the propagator).</p>
+<p>TODO Table of primitive propagators and their generic operations.</p>
+</div>
+<div class="section" id="uniform-applicative-extension-of-propagators">
+<h2><a class="toc-backref" href="#id34">Uniform Applicative Extension of Propagators</a></h2>
+<p>Also, most (TODO document which) primitive propagators are wrapped
+with the <tt class="docutils literal"><span class="pre">nary-mapping</span></tt> wrapper function around their underlying
+generic operation.  This wrapper function is an implementation of the
+idea of applicative functors (TODO cite McBride and Paterson), so if
+your partial information structure is an applicative functor, you can
+use this to teach most propagators how to handle it.</p>
+<p><tt class="docutils literal"><span class="pre">((binary-map</span> <span class="pre">info1</span> <span class="pre">info2)</span> <span class="pre">f)</span>&nbsp; <span class="pre">==&gt;</span>&nbsp; <span class="pre">new-info</span></tt>
+The generic procedure <tt class="docutils literal"><span class="pre">binary-map</span></tt> encodes how to apply a strict
+function to partial information arguments.  <tt class="docutils literal"><span class="pre">binary-map</span></tt> itself is
+generic over the two information arguments, and is expected to return
+a handler that will accept the desired function <tt class="docutils literal"><span class="pre">f</span></tt> and properly
+apply it.  For example, consider contingent information.  A strict
+operation on the underlying information that is actually contingent
+should be applied by collecting the premises that both inputs are
+contingent on, applying the function, and wrapping the result up in a
+new contingency object that contains the result of the function
+contingent upon the set-union of the premises from both inputs:</p>
+<pre class="literal-block">
+(define (contingency-binary-map c1 c2)
+  (lambda (f)
+    (contingent
+     (f (contingent-info c1) (contingent-info c2))
+     (set-union (contingent-premises c1) (contingent-premises c2)))))
+
+(defhandler binary-map contingency-binary-map contingency? contingency?)
+</pre>
+<p>Note that the information inside a contingency object may itself be
+partial, and so perhaps necessitate a recursive call to
+<tt class="docutils literal"><span class="pre">binary-map</span></tt>.  This recursion is handled by the given function
+<tt class="docutils literal"><span class="pre">f</span></tt>, and need not the invoked explicitly in handlers for
+<tt class="docutils literal"><span class="pre">binary-map</span></tt>.</p>
+<p>A handler for <tt class="docutils literal"><span class="pre">binary-map</span></tt> is expected to accept two partial
+information structures and return a procedure of one argument that
+will accept a binary function.  It is free to apply that function as
+many or as few times as necessary, and is expected to produce the
+appropriate result of &quot;mapping&quot; that function over the information in
+the input partial information structures to produce a new partial
+information structure, encoding all the appropriate uncertainty from
+both inputs.</p>
+<p>The <tt class="docutils literal"><span class="pre">nary-mapping</span></tt> wrapper works by repeated use of <tt class="docutils literal"><span class="pre">binary-map</span></tt>
+on arguments of arity greater than two.  For unary arguments,
+<tt class="docutils literal"><span class="pre">nary-mapping</span></tt> invokes <tt class="docutils literal"><span class="pre">binary-map</span></tt> with a bogus second argument.
+Therefore, be sure to supply handlers to <tt class="docutils literal"><span class="pre">binary-map</span></tt> that handle
+applications thereof that have your new partial information structure
+as one argument, and a raw Scheme object as the other (this is a good
+idea anyway, and saves the trouble of writing handlers for an explicit
+<tt class="docutils literal"><span class="pre">unary-map</span></tt> operation).</p>
+<p>TODO Table of all primitive propagators that are affected by binary-map.</p>
+</div>
+<div class="section" id="interoperation-with-existing-partial-information-types">
+<h2><a class="toc-backref" href="#id35">Interoperation with Existing Partial Information Types</a></h2>
+<p>A new partial information structure may interact with an existing one
+in two ways:</p>
+<ul class="simple">
+<li>as arguments to merge or to binary propagators</li>
+<li>by containment (of and by)</li>
+</ul>
+<p>The first is in general handled by making sure that <tt class="docutils literal"><span class="pre">merge</span></tt>,
+<tt class="docutils literal"><span class="pre">binary-map</span></tt>, and all approriate individual propagator generic
+operations have methods that can handle any combinations that may
+arise.  Often, the way to deal with two information structures of
+different but compatible types is to realize that one of them can be
+seen as an instance of the other type.  The coercion machinery (which
+see) allows one to declare when this situation obtains so that
+<tt class="docutils literal"><span class="pre">defhandler-coercing</span></tt> does the right thing.  The specific touch
+points for this are the type testers and coercers of the existing
+partial information types:</p>
+<pre class="literal-block">
+| Type                | Predicate      | Coercer      |
+|---------------------+----------------+--------------|
+| Nothing             | nothing?       | --           |
+| Raw Scheme object   | various        | --           |
+| Numerical interval  | interval?      | -&gt;interval   |
+| Scheme pairs        | pair?          | --           |
+| Propagator cells    | cell?          | --           |
+| Propagator closures | closure?       | --           |
+| Contingency object  | contingent?    | -&gt;contingent |
+| TMS                 | tms?           | -&gt;tms        |
+| Contradiction       | contradictory? | --           |
+</pre>
+<p>Notes:</p>
+<ul class="simple">
+<li>The <tt class="docutils literal"><span class="pre">nothing</span></tt> information structure defines methods on <tt class="docutils literal"><span class="pre">merge</span></tt>
+and the propagators that do the right thing for any other object, so
+does not require any additional effort.</li>
+<li>TMSes automatically coerce to TMS any object that is declared
+coercible to a raw contingency object.</li>
+</ul>
+<p>For example:</p>
+<pre class="literal-block">
+(declare-coercion interval? -&gt;contingent)
+</pre>
+<p>allows raw intervals to be seen as TMSes.  This has the effect that if
+a binary operation (either <tt class="docutils literal"><span class="pre">merge</span></tt> or a primitive propagator subject
+to <tt class="docutils literal"><span class="pre">nary-mapping</span></tt>) encounter a TMS on one input and an interval on
+the other, it will coerce the interval to a TMS containing exactly
+that interval contingent on the empty set of premises, and then
+operate on those two structures as on TMSes.</p>
+<p>The second kind of interoperation is handled by correctly dealing with
+merge effects (which see).  If you make a new partial information
+structure that contains others, you must make sure to handle any merge
+effects that may arise when recursively merging the partial
+information your structure contains.  If you make a new partial
+information structure that may need to have effects performed on
+merge, you should return those as appropriate merge effects in an
+<tt class="docutils literal"><span class="pre">effectful</span></tt> structure, and, if you need to create new kinds of
+effects in addition to the built-in ones, you should extend the
+generic operations <tt class="docutils literal"><span class="pre">execute-effect</span></tt>, <tt class="docutils literal"><span class="pre">redundant-effect?</span></tt>, and
+<tt class="docutils literal"><span class="pre">generic-attach-premises</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="making-new-primitive-propagators">
+<h1><a class="toc-backref" href="#id36">Making New Primitive Propagators</a></h1>
+<div class="section" id="direct-construction-from-functions">
+<h2><a class="toc-backref" href="#id37">Direct Construction from Functions</a></h2>
+<p>The fundamental way to make your own primitive propagators is
+the procedure <tt class="docutils literal"><span class="pre">function-&gt;propagator-constructor</span></tt>.  It takes a Scheme
+function, and makes a propagator construction procedure out of it that
+makes a propagator that does the job implemented by that Scheme
+function.  The propagator constructor in question takes one more
+argument than the original function, the extra argument being the cell
+into which to write the output.  So the result of
+<tt class="docutils literal"><span class="pre">function-&gt;propagator-constructor</span></tt> is a diagram-style procedure
+(complete with (most of) the debugging information, and the constant
+conversion).  The return value of <tt class="docutils literal"><span class="pre">function-&gt;propagator-constructor</span></tt>
+can be put into a cell, just same way that a Scheme procedure
+can be the value of a Scheme variable.  For example, you might define:</p>
+<pre class="literal-block">
+(define-cell p:my-primitive (function-&gt;propagator-constructor do-it))
+</pre>
+<p>where <tt class="docutils literal"><span class="pre">do-it</span></tt> is the appropriate Scheme function.</p>
+<p>Two things to pay attention to: <tt class="docutils literal"><span class="pre">function-&gt;propagator-constructor</span></tt>
+wraps the given function up into a propagator directly, and it is up
+to the function itself to handle any interesting partial information
+type that might come out of its argument cells.  Notably, <tt class="docutils literal"><span class="pre">nothing</span></tt>
+might show up in the arguments of that function when it is called.
+Therefore, it may be appropriate the make the function itself generic,
+and/or wrap it in <tt class="docutils literal"><span class="pre">nary-mapping</span></tt>.  For example, check out how the
+provided primitive <tt class="docutils literal"><span class="pre">p:and</span></tt> and <tt class="docutils literal"><span class="pre">p:or</span></tt> propagators are implemented,
+in <tt class="docutils literal"><span class="pre">core/standard-propagators.scm</span></tt>.</p>
+<p>The second thing is metadata.  <tt class="docutils literal"><span class="pre">function-&gt;propagator-constructor</span></tt>
+can supply all the metadata that the debugger uses except the name for
+your function.  That you need to add yourself, with <tt class="docutils literal"><span class="pre">(name!</span>
+<span class="pre">your-function</span> <span class="pre">'some-name)</span></tt>.</p>
+<div class="section" id="propagator-constructor-combinators">
+<h3><a class="toc-backref" href="#id38">Propagator Constructor Combinators</a></h3>
+<p>Once you've made a diagram-style propagator constructor, you can make
+a variant that likes to be applied in expression style with
+<tt class="docutils literal"><span class="pre">expression-style-variant</span></tt>.  For example, <tt class="docutils literal"><span class="pre">e:and</span></tt> is actually
+defined as:</p>
+<pre class="literal-block">
+(define-cell e:and (expression-style-variant p:and))
+</pre>
+<p>You can also delay the actual construction of your primitives
+if you want with <tt class="docutils literal"><span class="pre">delayed-propagator-constructor</span></tt>, though that's
+really more useful with recursive compound propagators.</p>
+</div>
+</div>
+<div class="section" id="dwim-propagator-construction">
+<h2><a class="toc-backref" href="#id39">DWIM Propagator Construction</a></h2>
+<p>All that wrapping in <tt class="docutils literal"><span class="pre">nary-mapping</span></tt>, and naming your propagator
+functions with <tt class="docutils literal"><span class="pre">name!</span></tt>, and calling <tt class="docutils literal"><span class="pre">expression-style-variant</span></tt> to
+convert them to expression-style versions can get tedious.  This whole
+shebang is automated by the <tt class="docutils literal"><span class="pre">propagatify</span></tt> macro:</p>
+<pre class="literal-block">
+(propagatify + nary-mapping)
+</pre>
+<p>turns into</p>
+<pre class="literal-block">
+(define generic-+ (make-generic-operator 2 '+ +))
+(define-cell p:+
+ (function-&gt;propagator-constructor (nary-mapping generic-+)))
+(define-cell e:+ (expression-style-variant p:eq?))
+</pre>
+<p>Use this with some caution; you may not always want <tt class="docutils literal"><span class="pre">nary-mapping</span></tt>,
+and you may sometimes want to <tt class="docutils literal"><span class="pre">propagatify</span></tt> the raw Scheme function
+instead of making a corresponding generic operator.  The macro is
+defined in <tt class="docutils literal"><span class="pre">core/sugar.scm</span></tt>; comments there describe it more fully.</p>
+<p>Note that <tt class="docutils literal"><span class="pre">propagatify</span></tt> follows the naming convention that the
+Scheme procedure <tt class="docutils literal"><span class="pre">foo</span></tt> becomes a generic procedure named
+<tt class="docutils literal"><span class="pre">generic-foo</span></tt> and then turns into propagators <tt class="docutils literal"><span class="pre">p:foo</span></tt> and
+<tt class="docutils literal"><span class="pre">e:foo</span></tt>.</p>
+</div>
+<div class="section" id="compound-cell-carrier-construction">
+<h2><a class="toc-backref" href="#id40">Compound Cell Carrier Construction</a></h2>
+<p><tt class="docutils literal"><span class="pre">p:cons</span></tt> is an interesting propagator, because while it performs the
+job of a Scheme procedure (to wit, <tt class="docutils literal"><span class="pre">cons</span></tt>), it operates directly on
+the cells that are its arguments, rather than on their contents.
+This patterns is also abstracted:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">(function-&gt;cell-carrier-constructor</span> <span class="pre">f)</span></tt></dt>
+<dd><p class="first">Is like <tt class="docutils literal"><span class="pre">function-&gt;propagator-constructor</span></tt>, except it makes
+propagators that operate on the cells that are their arguments
+rather than on the partial information structures those cells
+contain.  <tt class="docutils literal"><span class="pre">p:cons</span></tt> could have been defined as:</p>
+<pre class="last literal-block">
+(define-cell p:cons (function-&gt;cell-carrier-constructor cons))
+</pre>
+</dd>
+</dl>
+<p>The rest of this machinery is in <tt class="docutils literal"><span class="pre">core/carrying-cells.scm</span></tt>.</p>
+<p>Defining <tt class="docutils literal"><span class="pre">p:cons</span></tt> to operate on its argument cells constitutes a
+decision to follow the &quot;carrying cells&quot; rather than the &quot;copying data&quot;
+strategy from the propagator thesis.</p>
+</div>
+<div class="section" id="fully-manual-low-level-propagator-construction">
+<h2><a class="toc-backref" href="#id41">Fully-manual Low-level Propagator Construction</a></h2>
+<p>Finally, when the thing you want your propagator to do is so low-level and
+interesting that it doesn't even correspond to a Scheme function,
+there's always the <tt class="docutils literal"><span class="pre">propagator</span></tt> procedure.  This is the lowest level
+interface to asking cells to notify a propagator when they change.
+<tt class="docutils literal"><span class="pre">propagator</span></tt> expects a list of cells that your propagator is
+interested in, and a thunk that implements the job that propagator is
+supposed to do.  The scheduler will execute your thunk from time to
+time --- the only promise is that it will run at least once after the
+last time any cell in the supplied neighbor list gains any new
+information.  For example:</p>
+<pre class="literal-block">
+(define (my-hairy-thing cell1 cell2)
+  (propagator (list cell1 cell2)
+    (lambda ()
+      do-something-presumably-with-cell1-and-cell2)))
+</pre>
+<p>The <tt class="docutils literal"><span class="pre">propagator</span></tt> procedure being the lowest possible level, it has
+no access to any useful sources of metadata, so you will need to
+provide yourself any metadata you want to be able to access later.
+For an example of how this facility is used, see the implementations
+of <tt class="docutils literal"><span class="pre">function-&gt;propagator-constructor</span></tt> and
+<tt class="docutils literal"><span class="pre">delayed-propagator-constructor</span></tt> in <tt class="docutils literal"><span class="pre">core/propagators.scm</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="debugging">
+<h1><a class="toc-backref" href="#id42">Debugging</a></h1>
+<p>There is no stand-alone &quot;propagator debugger&quot;; if something goes
+wrong, the underlying Scheme debugger is your friend.  Some effort
+has, however, been expended on making your life easier.</p>
+<p>In normal operation, Scheme-Propagators keeps track of some metadata
+about the network that is running.  This metadata can be invaluable
+for debugging propagator networks.  The specific data it tries to
+track is:</p>
+<ul class="simple">
+<li>The names (non-unique but semantic) of all the cells and
+propagators.  This is in contrast with the unique but non-semantic
+object hashes of all the cells and propagators that MIT Scheme
+tracks anyway.</li>
+<li>Which propagators are connected to which cells.</li>
+<li>Whether the connections are input, output, or both.</li>
+<li>The grouping structure of the propagator network, as approximately
+defined by the call structure of the Scheme procedures that
+constructed it.</li>
+</ul>
+<p>To make sure that your network tracks this metadata well, you should
+use the high level interfaces to making cells, propagators, and
+propagator constructors when possible (<tt class="docutils literal"><span class="pre">define-cell</span></tt>, <tt class="docutils literal"><span class="pre">let-cells</span></tt>,
+<tt class="docutils literal"><span class="pre">define-propagator</span></tt>, <tt class="docutils literal"><span class="pre">propagatify</span></tt>, etc).  Any gaps not
+filled by use of these interfaces must either be accepted as gaps or
+be filled by hand.</p>
+<p>Perhaps the most spectacular use of the metadata facility is to
+draw pictures of your propagator network.  Just type:</p>
+<pre class="literal-block">
+(draw:show-graph)
+</pre>
+<p>at the REPL and watch what happens!  If the picture does not look like
+the graph you thought you made, make sure the connection metadata is
+collected appropriately, but then check your code to see whether you
+miswired something.  If the picture contains useless gibberish in the
+labels, make sure the names of things are correctly assigned and
+tracked.  If <tt class="docutils literal"><span class="pre">dot</span></tt> crashes, maybe your network is too big for it.
+For more on various pictures you can draw, look in the source comments
+in <tt class="docutils literal"><span class="pre">extensions/draw.scm</span></tt>.</p>
+<p>Of course, in order to use the metadata for debugging, you must be
+able to read it.  Inspection procedures using the metadata are provided:</p>
+<dl class="docutils">
+<dt>name</dt>
+<dd>the name of an object, should it have one</dd>
+<dt>cell?</dt>
+<dd>whether something is a cell or not</dd>
+<dt>propagator?</dt>
+<dd>whether something is a propagator or not</dd>
+<dt>propagator-inputs</dt>
+<dd>the inputs of a propagator (a list of cells)</dd>
+<dt>propagator-outputs</dt>
+<dd>the outputs of a propagator (a list of cells)</dd>
+<dt>neighbors</dt>
+<dd>the readers of a cell (a list of propagators)</dd>
+<dt>cell-non-readers</dt>
+<dd>other propagators somehow associated with a cell (presumably ones
+that write to it)</dd>
+<dt>cell-connections</dt>
+<dd>all propagators around a cell (the append of the neighbors
+and the non-readers)</dd>
+<dt>network-group-of</dt>
+<dd>a metadata object representing the context in which
+the object being examined was created (see <tt class="docutils literal"><span class="pre">core/metadata.scm</span></tt>
+to learn what you can do with them)</dd>
+</dl>
+<p>You can use these at least somewhat to wander around a network you are
+debugging.  Be advised that both cells and propagators are represented
+directly as Scheme procedures, and therefore do not print very nicely
+at the REPL.</p>
+<p>If you find yourself doing something strange that circumvents the
+usual metadata tracking mechanisms, you can add the desired metadata
+yourself.  All the metadata collection procedures are defined in
+<tt class="docutils literal"><span class="pre">core/metadata.scm</span></tt>; they generally use the <tt class="docutils literal"><span class="pre">eq-properties</span></tt>
+mechanism in <tt class="docutils literal"><span class="pre">support/eq-properties.scm</span></tt> to track the metadata, so
+you can use it to add more.  In particular, see the definition of, say,
+<tt class="docutils literal"><span class="pre">function-&gt;propagator-constructor</span></tt> or <tt class="docutils literal"><span class="pre">define-propagator</span></tt>
+for examples of how this is done.</p>
+</div>
+<div class="section" id="miscellany">
+<h1><a class="toc-backref" href="#id43">Miscellany</a></h1>
+<div class="section" id="implicit-cell-syntax">
+<h2><a class="toc-backref" href="#id44">Implicit Cell Syntax</a></h2>
+<p>A quirky little feature, called
+<tt class="docutils literal"><span class="pre">%%</span></tt>.  This is a Scheme object, therefore Scheme-Propagators syntax,
+for controlling the argument position of the implicit cell that an
+expression-style application will make and return.  Perhaps examples
+are best:</p>
+<pre class="literal-block">
+(e: foo bar)     ==  (e: foo bar %%)
+
+(e: foo %% bar)  ==  (let-cell new (p: foo new bar) new)
+</pre>
+<p>I borrowed this idea from Guy Steele's PhD thesis on constraint
+languages, and it was a year between when I implemented it and
+when I first used it.  The use case I do have is when I
+want to make a new cell participate in an input position
+in a constraint with some existing cells:</p>
+<pre class="literal-block">
+(define-cell x)
+(define-cell z)
+(define-cell y (ce:+ x %% z))
+(add-content x 5)
+(add-content y 3)
+(run)
+(content z) ==&gt; 8
+</pre>
+<p>Perhaps this use case could also be served by adding more
+expression-style constraint procedures (namely <tt class="docutils literal"><span class="pre">ce:-</span></tt>, which I do
+not currently have), but then again maybe it's elegant.</p>
+</div>
+<div class="section" id="reboots">
+<h2><a class="toc-backref" href="#id45">Reboots</a></h2>
+<p>The procedure <tt class="docutils literal"><span class="pre">initialize-scheduler</span></tt> wipes out an existing
+propagator network and lets you start afresh:</p>
+<pre class="literal-block">
+build lots of network
+...
+(initialize-scheduler)
+(run) --- nothing happens; no propagators to run!
+</pre>
+</div>
+<div class="section" id="compiling">
+<h2><a class="toc-backref" href="#id46">Compiling</a></h2>
+<p>It turns out that <tt class="docutils literal"><span class="pre">make-cell</span></tt> and <tt class="docutils literal"><span class="pre">cell?</span></tt> are also MIT Scheme
+primitives, so if you want to compile your Scheme-Propagators
+code, be sure to put</p>
+<pre class="literal-block">
+(declare (usual-integrations make-cell cell?))
+</pre>
+<p>at the top of your source files.  Also, of course, you need to be
+suitably careful to make sure that the defined macros are available to
+the syntaxer when it processes your file.  See
+<tt class="docutils literal"><span class="pre">support/auto-compilation.scm</span></tt> for how I do this, and, say,
+<tt class="docutils literal"><span class="pre">core/load.scm</span></tt> for how I use the compiler.</p>
+</div>
+<div class="section" id="scmutils">
+<h2><a class="toc-backref" href="#id47">Scmutils</a></h2>
+<p>The <a class="reference external" href="http://groups.csail.mit.edu/mac/users/gjs/6946/linux-install.htm">Scmutils</a> system built by Gerald Jay Sussman for thinking about
+physics can be very useful for many purposes.  Among other things,
+it knows about units and dimensions, about symbolic algebra,
+about solving systems of equations, etc.  Scheme-Propagators runs
+in Scmutils just as well as in MIT Scheme; and some of the unit
+tests in the self-test suite rely on Scmutils.</p>
+</div>
+<div class="section" id="editing">
+<h2><a class="toc-backref" href="#id48">Editing</a></h2>
+<p>I edit code in Emacs.  Emacs of course has a Scheme mode; nothing more
+need be said about that here.</p>
+<p>If you are going to edit any parenthesized source code in Emacs,
+<a class="reference external" href="http://www.emacswiki.org/emacs/ParEdit">Paredit mode</a> is a godsend.</p>
+<p>In addition to the above, I find it very useful to have my editor
+highlight and indent some of the Scheme-Propagators macros I have
+defined the same way as their Scheme analogues; notably
+<tt class="docutils literal"><span class="pre">define-propagator</span></tt> and <tt class="docutils literal"><span class="pre">let-cells</span></tt>.  Sadly the
+Emacs Scheme mode does not do this by default, so you need to tweak
+the Emacs config to do that.  The file <tt class="docutils literal"><span class="pre">support/scm-propagators.el</span></tt>
+contains a dump of the relevant portion of my Emacs configuration.</p>
+</div>
+<div class="section" id="hacking">
+<h2><a class="toc-backref" href="#id49">Hacking</a></h2>
+<p>Scheme-Propagators is a work in progress.  Be aware that I
+will continue to hack it to my heart's content.  Likewise, feel free
+to hack it to yours --- let me know if you invent or implement
+something interesting.</p>
+<p>TODO Describe where in the source various constructs are defined?  So that
+it is possible to mimic them (e.g. more primitive propagators) and/or
+adapt them.</p>
+</div>
+<div class="section" id="examples">
+<h2><a class="toc-backref" href="#id50">Examples</a></h2>
+<p>There are some basic examples in <tt class="docutils literal"><span class="pre">core/example-networks.scm</span></tt>; more
+elaborate examples are available in <tt class="docutils literal"><span class="pre">examples/</span></tt>.</p>
+</div>
+<div class="section" id="arbitrary-choices">
+<h2><a class="toc-backref" href="#id51">Arbitrary Choices</a></h2>
+<p>Several language design choices affecting the structure of
+Scheme-Propagators appeared arbitrary at the time they were made.
+First, diagram style application was picked as the default over
+expression style when applying cells whose contents are not yet known,
+and for defining compound propagators when the style is not specified
+more clearly.  The main rationale for this decision was that choosing
+expression style as the default would have made Scheme-Propagators too
+much like every other programming language; the unusual expressive
+power of fanin that the propagator model offers can be taken advantage
+of only if at least some of one's code actually has fanin, and writing
+code with fanin requires diagram style.  So we chose to make diagram
+style the default, to emphasize that potential.</p>
+<p>Second, there was a choice about where to put the delaying of pieces
+of propagator network that should be constructed only conditionally.
+Every recursion traverses an abstraction boundary and a conditional
+statement every time it goes around.  Every recursion must encounter
+at least one delay barrier every time it goes around, or the
+construction of the network may generate spurious infinite regresses.
+But where should that barrier go?  There were three plausible
+alterntives: the first idea was to put the barrier around the
+application of recursive compound propagators; the second was to
+generalize this to put it around the application of all compound
+propagators; and the third was to capture the bodies of conditional
+expressions like <tt class="docutils literal"><span class="pre">p:if</span></tt> and delay only their construction.  During
+most of the development of Scheme-Propagators, we were using option 1,
+on the grounds that it sufficed and was easy to implement.  Doing this
+had the effect that in order to actually make a proper recursive
+propagator, one had to manually &quot;guard&quot;, using a hand-crafted pile of
+<tt class="docutils literal"><span class="pre">switch</span></tt> propagators, all the i/o of a recursive call to prevent it
+from being expanded prematurely.  For example, a recursive factorial
+network written in that style would have looked something like:</p>
+<pre class="literal-block">
+(define-propagator (p:factorial n n!)
+  (let-cells ((done? (e:= n 0)) n-again n!-again)
+    (p:conditional-wire (e:not done?) n n-again)
+    (p:conditional-wire (e:not done?) n! n!-again)
+    (p:* (e:factorial (e:- n-again 1)) n-again n!-again)
+    (p:conditional-wire done? 1 n!)))
+</pre>
+<p>with the added caveat that it would need to be marked as being
+recursive, so the expansion of the internal factorial would be delayed
+until it got some information on its boundary (which would be
+prevented from happening in the base case by the <tt class="docutils literal"><span class="pre">conditional-wire</span></tt>
+propagators).  Very late in the game we finally decided to write a
+series of macros (<tt class="docutils literal"><span class="pre">p:when</span></tt>, <tt class="docutils literal"><span class="pre">p:unless</span></tt>, <tt class="docutils literal"><span class="pre">p:if</span></tt>, and their
+expression-style variants) that automated the process of constructing
+those <tt class="docutils literal"><span class="pre">conditional-wire</span></tt> propagators.  On making these macros work,
+we realized that adjusting <tt class="docutils literal"><span class="pre">p:when</span></tt> and company to delay their
+interior would be just as easy as delaying the opening of
+abstractions.  At that point we decided to switch to doing it that
+way, on the grounds that <tt class="docutils literal"><span class="pre">if</span></tt> is special in all other computer
+languages, so it might as well be special here too, and we will leave
+the operation of abstractions relatively simple.  (Partial information
+makes abstractions complicated enough as it is!)  This has the further
+nice feature that it sidesteps a possible bug with delayed
+abstractions: that being that if one wanted to create a nullary
+abstraction, automatic delay of its expansion would presumably not be
+what one wanted.</p>
+<p>Third, the decision to go with the carrying cells strategy for
+compound data felt, while not really arbitrary, at least enough not
+forced by the rest of the design to be worth some mention.  The topic
+is discussed at length elsewhere, and the available options detailed;
+so here we will just note why we ended up choosing carrying cells.
+For a long time, copying data seemed like the right choice, because it
+avoided spooky &quot;action at a distance&quot;; and merges did not require
+changing the structure of the network.  The downside of copying data,
+namely the cost of the copying, seemed small enough to ignore.  Then
+we tried to write a program for thinking about electrical circuits.</p>
+<p>The specific killer part of the electrical circuits program was that
+we tried to equip it with observers that built a data structure for
+every circuit element containing its various parameters and state
+variables, and for every subcircuit a data structure containing its
+circuit elements, all the way up.  When this program turned out to be
+horribly slow, we realized that copying data actually produces a
+quadratic amount of work: every time any circuit variable is updated,
+the whole chain of communication all the way from resistor to complete
+breadboard is activated, and they repeat merges of all the compounds
+that they had accumulated, just to push that one little piece of
+information all the way to the toplevel observer.  In addition, these
+summary structures turned out to be less useful for debugging than we
+had hoped, because the updates of the summary structures would be
+propagator operations just like the main computation, so when the
+latter would stop for some strange reason, we always had to wonder
+whether the summaries were up to date.</p>
+<p>Carrying cells seemed an appealing solution to both problems.  If the
+summaries carried cells instead of copying data, then updates to those
+cells would not have to trouble the whole pipe by which the cells were
+carried, but would just be transmitted through those cells.  Also, if
+we played our cards right, we should have been able to arrange for
+exactly the cells where the computation was actually happening to be
+the ones carried all the way to where we could get them from those
+summary structures, so that the summaries would always be up to date
+with the underlying computation.  But what about the pesky fact that
+merging structures that carry cells requires side effects on the
+network?  What if that merge is contingent on some premises because
+the cell-carriers are in some TMS?</p>
+<p>That was when merge effects were invented.  We realized that merging
+really should have legitimate side effects on the network, but should
+package those effects up in manipulable objects that it returns,
+instead of trying to just execute them.  So the question that merge
+answers was changed from</p>
+<blockquote>
+What is the least-commitment information structure that captures
+all the knowledge in these two information structures?</blockquote>
+<p>to</p>
+<blockquote>
+What needs to be done to the network in order to make it reflect the
+discovery that these two information structures are about the same
+object?</blockquote>
+<p>The latter nicely subsumes the former: a normal merge is just the
+answer &quot;record in the appropriate cell that the object of interest is
+described by this information structure&quot;.  So everything fell into
+place.  The strange <tt class="docutils literal"><span class="pre">set!</span></tt> in the most basic definition of the cell
+is, indeed, an effect that needs to be performed on the network to
+acknowledge the discovery that two particular information structures
+are about the same object.  The even stranger error signalled on
+contradiction is an effect too: the thing that needs to be done to the
+network to reflect the discovery that two completely incompatible
+information structures describe the same object is to crash.  And now
+both merging cells carried by compound structures and signalling
+nogoods by TMSes become perfectly reasonable, respectable citizens of
+the propagator world; and they can interoperate with being contingent
+by the enclosing TMS modifying the effects to reflect the context in
+which they were generated before passing them on up out of its own
+call to merge.</p>
+<p>With that change of perspective on merging, a whole chunk of problems
+suddenly collapsed.  Cells could be merged with a simple &quot;link these
+two with (conditional) identity propagators&quot;.  Therefore compound data
+could be merged by recursively merging their fields, regardless of
+whether they were carrying cells or other partial information
+structures.  Closures fell into place --- they were just a particular
+kind of compound data, and merged the way compound data merges.
+Closures had been a conceptual problem for the copying data view of
+the world, because closures really felt like they wanted to able to
+attach their interior propagators to cells closed over from the
+enclosing lexical environment; but for that, it seemed that the
+lexical environment would need to be a cell-carrying data structure.
+But now that carrying cells works, there is no problem.  It was on
+that wave of euphoria that the carrying cells strategy rode into its
+current place as the standard way to make compound structures in the
+propagator world.  Carrying cells certainly still feels cleaner and
+nicer than copying data; but it may be that copying data really could
+still be made to work in all the scenarios where carrying cells is
+currently winning.  We just decided not to pursue that path.</p>
+<p>And on the note of copying data being preferable because it preserves
+locality, maybe <tt class="docutils literal"><span class="pre">cons</span></tt> really should be the locality-breaking object.</p>
+</div>
+<div class="section" id="revision-history-of-this-guide">
+<h2><a class="toc-backref" href="#id52">Revision History of this Guide</a></h2>
+<p>First written May 5, 2010 by Alexey Radul
+Rewritten August 17, 2010 by Alexey Radul and Gerald Jay Sussman</p>
+</div>
+</div>
+<div class="section" id="how-this-supports-the-goal">
+<h1><a class="toc-backref" href="#id53">How this supports the goal</a></h1>
+<p>TODO</p>
+</div>
+</div>
+</body>
+</html>

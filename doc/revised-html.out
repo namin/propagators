@@ -1,0 +1,57 @@
+\BOOKMARK [1][-]{section.1}{Propagator System}{}
+\BOOKMARK [1][-]{section.2}{Getting Started}{}
+\BOOKMARK [2][-]{subsection.2.1}{Examples}{section.2}
+\BOOKMARK [1][-]{section.3}{The Details}{}
+\BOOKMARK [1][-]{section.4}{Making Propagator Networks}{}
+\BOOKMARK [2][-]{subsection.4.1}{Attaching Basic Propagators: d@}{section.4}
+\BOOKMARK [2][-]{subsection.4.2}{Propagator Expressions: e@}{section.4}
+\BOOKMARK [2][-]{subsection.4.3}{Late Binding of Application}{section.4}
+\BOOKMARK [2][-]{subsection.4.4}{Provided Primitives: p:foo and e:foo}{section.4}
+\BOOKMARK [2][-]{subsection.4.5}{Cells are Data Too}{section.4}
+\BOOKMARK [2][-]{subsection.4.6}{Compound Data}{section.4}
+\BOOKMARK [2][-]{subsection.4.7}{Propagator Constraints: c:foo and ce:foo}{section.4}
+\BOOKMARK [2][-]{subsection.4.8}{Constants and Literal Values}{section.4}
+\BOOKMARK [2][-]{subsection.4.9}{Constant Conversion}{section.4}
+\BOOKMARK [2][-]{subsection.4.10}{Making Cells}{section.4}
+\BOOKMARK [2][-]{subsection.4.11}{Conditional Network Construction}{section.4}
+\BOOKMARK [1][-]{section.5}{Making New Compound Propagators}{}
+\BOOKMARK [2][-]{subsection.5.1}{Lexical Scope}{section.5}
+\BOOKMARK [2][-]{subsection.5.2}{Recursion}{section.5}
+\BOOKMARK [1][-]{section.6}{Using Partial Information}{}
+\BOOKMARK [1][-]{section.7}{Built-in Partial Information Structures}{}
+\BOOKMARK [2][-]{subsection.7.1}{Nothing}{section.7}
+\BOOKMARK [2][-]{subsection.7.2}{Just a Value}{section.7}
+\BOOKMARK [2][-]{subsection.7.3}{Numerical Intervals}{section.7}
+\BOOKMARK [2][-]{subsection.7.4}{Propagator Cells as Partial Information}{section.7}
+\BOOKMARK [2][-]{subsection.7.5}{Compound Data}{section.7}
+\BOOKMARK [2][-]{subsection.7.6}{Closures}{section.7}
+\BOOKMARK [2][-]{subsection.7.7}{Truth Maintenance Systems}{section.7}
+\BOOKMARK [2][-]{subsection.7.8}{Contradiction}{section.7}
+\BOOKMARK [2][-]{subsection.7.9}{Implicit Dependency-Directed Search}{section.7}
+\BOOKMARK [1][-]{section.8}{Making New Kinds of Partial Information}{}
+\BOOKMARK [2][-]{subsection.8.1}{An Example: Adding Interval Arithmetic}{section.8}
+\BOOKMARK [2][-]{subsection.8.2}{Generic Coercions}{section.8}
+\BOOKMARK [2][-]{subsection.8.3}{The Partial Information Generics}{section.8}
+\BOOKMARK [3][-]{subsubsection.8.3.1}{The Full Story on Merge}{subsection.8.3}
+\BOOKMARK [2][-]{subsection.8.4}{Individual Propagator Generics}{section.8}
+\BOOKMARK [2][-]{subsection.8.5}{Uniform Applicative Extension of Propagators}{section.8}
+\BOOKMARK [2][-]{subsection.8.6}{Interoperation with Existing Partial Information Types}{section.8}
+\BOOKMARK [1][-]{section.9}{Making New Primitive Propagators}{}
+\BOOKMARK [2][-]{subsection.9.1}{Direct Construction from Functions}{section.9}
+\BOOKMARK [3][-]{subsubsection.9.1.1}{Expression Style Variants}{subsection.9.1}
+\BOOKMARK [2][-]{subsection.9.2}{Propagatify}{section.9}
+\BOOKMARK [2][-]{subsection.9.3}{Compound Cell Carrier Construction}{section.9}
+\BOOKMARK [2][-]{subsection.9.4}{Fully-manual Low-level Propagator Construction}{section.9}
+\BOOKMARK [1][-]{section.10}{Debugging}{}
+\BOOKMARK [1][-]{section.11}{Miscellany}{}
+\BOOKMARK [2][-]{subsection.11.1}{Macrology}{section.11}
+\BOOKMARK [2][-]{subsection.11.2}{Reboots}{section.11}
+\BOOKMARK [2][-]{subsection.11.3}{Compiling}{section.11}
+\BOOKMARK [2][-]{subsection.11.4}{Scmutils}{section.11}
+\BOOKMARK [2][-]{subsection.11.5}{Editing}{section.11}
+\BOOKMARK [2][-]{subsection.11.6}{Hacking}{section.11}
+\BOOKMARK [2][-]{subsection.11.7}{Arbitrary Choices}{section.11}
+\BOOKMARK [3][-]{subsubsection.11.7.1}{Default Application and Definition Style}{subsection.11.7}
+\BOOKMARK [3][-]{subsubsection.11.7.2}{Locus of Delayed Construction}{subsection.11.7}
+\BOOKMARK [3][-]{subsubsection.11.7.3}{Strategy for Compound Data}{subsection.11.7}
+\BOOKMARK [1][-]{section.12}{How this supports the goal}{}

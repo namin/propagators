@@ -1,0 +1,116 @@
+----------------------------------------------------------------------
+Copyright 2009-2010 Alexey Radul.
+----------------------------------------------------------------------
+This file is part of Propagator Network Prototype.
+
+Propagator Network Prototype is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+Propagator Network Prototype is distributed in the hope that it will
+be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Propagator Network Prototype.  If not, see
+<http://www.gnu.org/licenses/>.
+----------------------------------------------------------------------
+
+
+INSTALLATION:
+
+Install MIT/GNU Scheme (required)
+  sudo aptitude install mit-scheme mit-scheme-doc mit-scheme-dbg or
+  http://www.gnu.org/software/mit-scheme/
+
+Install Mechanics Scmutils (optional)
+  http://groups.csail.mit.edu/mac/users/gjs/6946/linux-install.htm
+
+
+QUICK START:
+
+Execute ./run-tests in a shell to self-test
+
+Run (load "load") in Scheme to grab everything and start playing with it
+
+core/example-networks.scm and examples/* have usage examples
+
+
+CONTENT:
+
+The doc/ directory
+  contains documents about the whole system, and aspects of it.  The
+  main attractions as of this writing are the Propagator Networks
+  thesis and the Art of the Propagator paper.
+
+The core/ directory
+  implements Alexey's thesis, much sanitized and extended and updated.
+
+The extensions/ directory
+  adds (or attempts to add) various additional features and ideas.
+  The rest of the software relies on the extensions in extensions/ as
+  well as the core in core/.
+
+The examples/ directory
+  contains extended examples of uses of propagator networks.  This
+  code is not in any sense part of the system, but is a series of
+  clients.
+
+The support/ directory
+  contains supporting stuff that isn't about propagators at all; just
+  useful helpers and langauge facilities.
+  - eq-properties
+  - generic operations
+  - profilers
+  - miscellaneous utilities
+
+The testing/ directory
+  is the unit testing framework this project uses, distributed here in
+  source form.  As software, testing/ is a separate entity and not
+  part of the propagator project at all; but it so happens that Alexey
+  also maintains it.
+
+
+LOADING CONVENTION:
+
+Loading is done through files called load.scm in every directory.
+They are responsible for collecting the contents of their own
+directory, and for loading their needed dependencies when appropriate.
+
+The toplevel load.scm is the main entry point.  extensions/load.scm,
+core/load.scm, and examples/load.scm serve as secondary entry points
+for those portions of the system.
+
+
+UNIT TESTING:
+
+run-tests scripts run the unit tests for the portion of system in that
+directory.  The toplevel run-tests runs all the unit tests.
+
+examples/run-examples exercises all the extended examples.  This takes
+a minute, so is not considered part of the normal test suite.
+
+Unit tests are in test/ subdirectories of their respective
+directories.  The test suites are independent of each other, and
+nothing depends on them.
+
+The unit tests are organized into test groups.  Test groups are named
+after the test files they are in.
+
+Test suites can also be run from the REPL by loading the system,
+loading an appropriate test suite's test/load.scm file, and running
+(run-registered-tests).  This offers interactive debugging of the
+tests.
+
+Some of the extensions rely on the symbolic algebra subsystems in
+Mechanics Scmutils.  The full system will load just fine into a normal
+MIT/GNU Scheme, but extensions that need symbolic algebra will not
+work.  The extensions/run-tests script will not run without a
+Mechanics install, and the extensions/test/load.scm test suite will
+fail if you run it from the REPL in MIT/GNU Scheme.
+
+None of this applies to the testing/ directory, since it is a separate
+software project that happens to be distributed here in source form.
+

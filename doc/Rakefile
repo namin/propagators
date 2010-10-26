@@ -1,0 +1,68 @@
+# Three definitions copied and modified from Alexey's rake-latex.rb.
+# The modification is to remove the dependency on the
+# :{eps/pdf}pictures tasks, on the suspicion that that dependency was
+# causing spurious re-texing.
+def latex filename
+  desc "LaTeX #{filename}.tex"
+  file "#{filename}.dvi" => ["#{filename}.tex"] do
+    sh "latex #{filename}.tex"
+  end
+  task :latex => "#{filename}.dvi"
+end
+
+def pdflatex filename
+  desc "LaTeX #{filename}.tex to a PDF"
+  file "#{filename}.pdf" => ["#{filename}.tex"] do
+    sh "pdflatex #{filename}.tex"
+  end
+  task :pdflatex => "#{filename}.pdf"
+end
+
+def autobib filename
+  file "#{filename}.aux" => :pdflatex
+  file "#{filename}-auto.bib" => "#{filename}.aux" do
+    bibdump = "#{ENV['HOME']}/work/papers/bibdump.rb"
+    if File.executable?(bibdump)
+      sh "#{bibdump} #{filename}"
+    else
+      puts "Can't find the bibliography dumping program, ignoring"
+      touch "#{filename}-auto.bib"
+    end
+  end
+  file "#{filename}.bbl" => ["#{filename}-auto.bib"] do
+    sh "bibtex #{filename}"
+  end
+  desc "Regenerate the bibliography data"
+  task :bibtex => "#{filename}.bbl"
+end
+# End copied definitions
+
+def rstify filename
+  file "#{filename}.html" => ["#{filename}.rst", "style.css"] do
+    sh "rst2html --stylesheet style.css #{filename}.rst > #{filename}.html"
+  end
+  task :doc => "#{filename}.html"
+end
+
+rstify "programmer-guide"
+
+task :doc => :pdflatex
+
+pdflatex "revised"
+autobib "revised"
+
+file "revised-html.tex" => "revised.tex" do
+  sh "cat revised.tex | grep -v hypertarget | grep -v pdfbookmark > revised-html.tex"
+end
+
+file "revised-html/revised-html.html" => "revised-html.tex" do
+  sh "pdflatex revised-html.tex"
+  sh "bibtex revised-html"
+  sh "latex2html -split 0 -nonavigation revised-html"
+end
+
+task :doc => "revised.html"
+
+file "revised.html" => "revised-html/revised-html.html" do
+  sh "cp revised-html/revised-html.html revised-html.html"
+end

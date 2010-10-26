@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec mit-scheme --compiler -heap 6000 --batch-mode --no-init-file --eval '(set! load/suppress-loading-message? #t)' --eval '(begin (load "load") (load "slow-examples") (flush-output) (show-time run-registered-tests) (newline) (flush-output) (%exit 0))'

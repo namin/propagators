@@ -1,0 +1,17 @@
+#!/bin/bash
+
+cd support
+./run-tests
+
+cd ../core
+./run-tests
+
+cd ../extensions
+./run-tests
+
+cd ../examples
+./run-tests
+./run-mechanics-tests
+
+#cd ../explorations/circuits
+#./run-tests

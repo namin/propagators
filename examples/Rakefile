@@ -1,0 +1,60 @@
+### ----------------------------------------------------------------------
+### Copyright 2009-2010 Alexey Radul.
+### ----------------------------------------------------------------------
+### This file is part of Propagator Network Prototype.
+### 
+### Propagator Network Prototype is free software; you can redistribute it and/or modify
+### it under the terms of the GNU General Public License as published by
+### the Free Software Foundation, either version 3 of the License, or
+### (at your option) any later version.
+### 
+### Propagator Network Prototype is distributed in the hope that it will be useful,
+### but WITHOUT ANY WARRANTY; without even the implied warranty of
+### MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+### GNU General Public License for more details.
+### 
+### You should have received a copy of the GNU General Public License
+### along with Propagator Network Prototype.  If not, see <http://www.gnu.org/licenses/>.
+### ----------------------------------------------------------------------
+
+def scheme command
+  sh "mit-scheme --compiler -heap 6000 --batch-mode --no-init-file --eval '(set! load/suppress-loading-message? #t)' --load load --eval '(begin #{command} (%exit 0))'"
+end
+
+def dot_dump command, filename
+  task "#{filename}.dot" do
+    scheme "(initialize-scheduler) #{command} (draw:write-graph-to-file \"#{filename}.dot\")"
+  end
+  task "dot-graphs" => "#{filename}.dot"
+end
+
+def graphml_dump command, filename
+  task "#{filename}.graphml" do
+    scheme "(initialize-scheduler) #{command} (fluid-let ((draw:format (quote graphml))) (draw:write-graph-to-file \"#{filename}.graphml\"))"
+  end
+  task "graphmls" => "#{filename}.graphml"
+  task :pictures => "#{filename}.graphml"
+end
+
+def dot_process filename, format
+  file "#{filename}.#{format}" => "#{filename}.dot" do
+    sh "dot -T#{format} -o #{filename}.#{format} #{filename}.dot"
+  end
+  task :pictures => "#{filename}.#{format}"
+end
+
+def picture command, filename
+  dot_dump command, filename
+  dot_process(filename, "svg")
+  dot_process(filename, "png")
+  graphml_dump command, filename
+end
+
+picture "(define-cell f) (define-cell c) (fahrenheit->celsius f c)", "fahrenheit-to-celsius"
+picture "(define-cell f) (define-cell c) (define-cell k) (fahrenheit-celsius f c) (celsius-kelvin c k)", "temperature"
+picture "(define-cell fall-time) (define-cell building-height) (define-cell barometer-height) (define-cell barometer-shadow) (define-cell building-shadow) (fall-duration fall-time building-height) (similar-triangles barometer-shadow barometer-height building-shadow building-height)", "barometer"
+picture "(define-cell x) (define-cell sqrt-x) (sqrt-network x sqrt-x) (add-content x 2) (run)", "recursive-sqrt"
+picture "(multiple-dwelling)", "multiple-dwelling"
+picture "(multiple-dwelling-expressions)", "multiple-dwelling-expressions"
+picture "(build-network)", "riddle-of-the-knights"
+picture "(build-albatross-network)", "albatross-conundrum"

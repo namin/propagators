@@ -1,0 +1,58 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Propagator System}{3}{section.1}
+\contentsline {section}{\numberline {2}Getting Started}{4}{section.2}
+\contentsline {subsection}{\numberline {2.1}Examples}{5}{subsection.2.1}
+\contentsline {section}{\numberline {3}The Details}{5}{section.3}
+\contentsline {section}{\numberline {4}Making Propagator Networks}{5}{section.4}
+\contentsline {subsection}{\numberline {4.1}Attaching Basic Propagators: d@}{6}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Propagator Expressions: e@}{6}{subsection.4.2}
+\contentsline {subsection}{\numberline {4.3}Late Binding of Application}{8}{subsection.4.3}
+\contentsline {subsection}{\numberline {4.4}Provided Primitives: p:foo and e:foo}{8}{subsection.4.4}
+\contentsline {subsection}{\numberline {4.5}Cells are Data Too}{9}{subsection.4.5}
+\contentsline {subsection}{\numberline {4.6}Compound Data}{10}{subsection.4.6}
+\contentsline {subsection}{\numberline {4.7}Propagator Constraints: c:foo and ce:foo}{11}{subsection.4.7}
+\contentsline {subsection}{\numberline {4.8}Constants and Literal Values}{12}{subsection.4.8}
+\contentsline {subsection}{\numberline {4.9}Constant Conversion}{13}{subsection.4.9}
+\contentsline {subsection}{\numberline {4.10}Making Cells}{13}{subsection.4.10}
+\contentsline {subsection}{\numberline {4.11}Conditional Network Construction}{15}{subsection.4.11}
+\contentsline {section}{\numberline {5}Making New Compound Propagators}{16}{section.5}
+\contentsline {subsection}{\numberline {5.1}Lexical Scope}{17}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}Recursion}{17}{subsection.5.2}
+\contentsline {section}{\numberline {6}Using Partial Information}{18}{section.6}
+\contentsline {section}{\numberline {7}Built-in Partial Information Structures}{20}{section.7}
+\contentsline {subsection}{\numberline {7.1}Nothing}{20}{subsection.7.1}
+\contentsline {subsection}{\numberline {7.2}Just a Value}{21}{subsection.7.2}
+\contentsline {subsection}{\numberline {7.3}Numerical Intervals}{21}{subsection.7.3}
+\contentsline {subsection}{\numberline {7.4}Propagator Cells as Partial Information}{22}{subsection.7.4}
+\contentsline {subsection}{\numberline {7.5}Compound Data}{22}{subsection.7.5}
+\contentsline {subsection}{\numberline {7.6}Closures}{23}{subsection.7.6}
+\contentsline {subsection}{\numberline {7.7}Truth Maintenance Systems}{23}{subsection.7.7}
+\contentsline {subsection}{\numberline {7.8}Contradiction}{25}{subsection.7.8}
+\contentsline {subsection}{\numberline {7.9}Implicit Dependency-Directed Search}{25}{subsection.7.9}
+\contentsline {section}{\numberline {8}Making New Kinds of Partial Information}{26}{section.8}
+\contentsline {subsection}{\numberline {8.1}An Example: Adding Interval Arithmetic}{27}{subsection.8.1}
+\contentsline {subsection}{\numberline {8.2}Generic Coercions}{28}{subsection.8.2}
+\contentsline {subsection}{\numberline {8.3}The Partial Information Generics}{30}{subsection.8.3}
+\contentsline {subsubsection}{\numberline {8.3.1}The Full Story on Merge}{31}{subsubsection.8.3.1}
+\contentsline {subsection}{\numberline {8.4}Individual Propagator Generics}{34}{subsection.8.4}
+\contentsline {subsection}{\numberline {8.5}Uniform Applicative Extension of Propagators}{34}{subsection.8.5}
+\contentsline {subsection}{\numberline {8.6}Interoperation with Existing Partial Information Types}{35}{subsection.8.6}
+\contentsline {section}{\numberline {9}Making New Primitive Propagators}{37}{section.9}
+\contentsline {subsection}{\numberline {9.1}Direct Construction from Functions}{37}{subsection.9.1}
+\contentsline {subsubsection}{\numberline {9.1.1}Expression Style Variants}{38}{subsubsection.9.1.1}
+\contentsline {subsection}{\numberline {9.2}Propagatify}{38}{subsection.9.2}
+\contentsline {subsection}{\numberline {9.3}Compound Cell Carrier Construction}{39}{subsection.9.3}
+\contentsline {subsection}{\numberline {9.4}Fully-manual Low-level Propagator Construction}{39}{subsection.9.4}
+\contentsline {section}{\numberline {10}Debugging}{39}{section.10}
+\contentsline {section}{\numberline {11}Miscellany}{41}{section.11}
+\contentsline {subsection}{\numberline {11.1}Macrology}{41}{subsection.11.1}
+\contentsline {subsection}{\numberline {11.2}Reboots}{41}{subsection.11.2}
+\contentsline {subsection}{\numberline {11.3}Compiling}{42}{subsection.11.3}
+\contentsline {subsection}{\numberline {11.4}Scmutils}{42}{subsection.11.4}
+\contentsline {subsection}{\numberline {11.5}Editing}{42}{subsection.11.5}
+\contentsline {subsection}{\numberline {11.6}Hacking}{42}{subsection.11.6}
+\contentsline {subsection}{\numberline {11.7}Arbitrary Choices}{43}{subsection.11.7}
+\contentsline {subsubsection}{\numberline {11.7.1}Default Application and Definition Style}{43}{subsubsection.11.7.1}
+\contentsline {subsubsection}{\numberline {11.7.2}Locus of Delayed Construction}{43}{subsubsection.11.7.2}
+\contentsline {subsubsection}{\numberline {11.7.3}Strategy for Compound Data}{44}{subsubsection.11.7.3}
+\contentsline {section}{\numberline {12}How this supports the goal}{46}{section.12}

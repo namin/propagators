@@ -1,0 +1,597 @@
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=pdflatex 2010.6.26)  9 SEP 2010 05:50
+entering extended mode
+ %&-line parsing enabled.
+**revised-html.tex
+(./revised-html.tex
+LaTeX2e <2005/12/01>
+Babel <v3.8h> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, croatian, ukrainian, russian, bulgarian, czech, slovak, danish, dut
+ch, finnish, basque, french, german, ngerman, ibycus, greek, monogreek, ancient
+greek, hungarian, italian, latin, mongolian, norsk, icelandic, interlingua, tur
+kish, coptic, romanian, welsh, serbian, slovenian, estonian, esperanto, upperso
+rbian, indonesian, polish, portuguese, spanish, catalan, galician, swedish, loa
+ded.
+(/usr/share/texmf-texlive/tex/latex/base/article.cls
+Document Class: article 2005/09/16 v1.4f Standard LaTeX document class
+(/usr/share/texmf-texlive/tex/latex/base/size12.clo
+File: size12.clo 2005/09/16 v1.4f Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf-texlive/tex/generic/babel/babel.sty
+Package: babel 2005/11/23 v3.8h The Babel package
+
+(/usr/share/texmf-texlive/tex/generic/babel/english.ldf
+Language: english 2005/03/30 v3.3o English support from the babel system
+
+(/usr/share/texmf-texlive/tex/generic/babel/babel.def
+File: babel.def 2005/11/23 v3.8h Babel common definitions
+\babel@savecnt=\count87
+\U@D=\dimen103
+)
+\l@british = a dialect from \language\l@english 
+\l@UKenglish = a dialect from \language\l@english 
+\l@canadian = a dialect from \language\l@american 
+\l@australian = a dialect from \language\l@british 
+\l@newzealand = a dialect from \language\l@british 
+))
+(/usr/share/texmf-texlive/tex/latex/ae/ae.sty
+Package: ae 2001/02/12 1.3 Almost European Computer Modern
+
+(/usr/share/texmf-texlive/tex/latex/base/fontenc.sty
+Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
+
+(/usr/share/texmf-texlive/tex/latex/base/t1enc.def
+File: t1enc.def 2005/09/27 v1.99g Standard LaTeX file
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
+)
+LaTeX Font Info:    Try loading font information for T1+aer on input line 100.
+
+(/usr/share/texmf-texlive/tex/latex/ae/t1aer.fd
+File: t1aer.fd 1997/11/16 Font definitions for T1/aer.
+)))
+(/usr/share/texmf-texlive/tex/latex/aeguill/aeguill.sty
+Package: aeguill 2003/08/02 1.02 AE fonts with french guillemets (D. Roegel)
+)
+(/usr/share/texmf-texlive/tex/latex/base/shortvrb.sty
+Package: shortvrb 2006/02/02 v2.1d Standard LaTeX documentation package (FMi)
+)
+(/usr/share/texmf-texlive/tex/latex/base/inputenc.sty
+Package: inputenc 2006/05/05 v1.1b Input encoding file
+\inpenc@prehook=\toks14
+\inpenc@posthook=\toks15
+
+(/usr/share/texmf-texlive/tex/latex/base/latin1.def
+File: latin1.def 2006/05/05 v1.1b Input encoding file
+))
+(/usr/share/texmf-texlive/tex/latex/tools/tabularx.sty
+Package: tabularx 1999/01/07 v2.07 `tabularx' package (DPC)
+
+(/usr/share/texmf-texlive/tex/latex/tools/array.sty
+Package: array 2005/08/23 v2.4b Tabular extension package (FMi)
+\col@sep=\dimen104
+\extrarowheight=\dimen105
+\NC@list=\toks16
+\extratabsurround=\skip43
+\backup@length=\skip44
+)
+\TX@col@width=\dimen106
+\TX@old@table=\dimen107
+\TX@old@col=\dimen108
+\TX@target=\dimen109
+\TX@delta=\dimen110
+\TX@cols=\count88
+\TX@ftn=\toks17
+)
+(/usr/share/texmf-texlive/tex/latex/tools/longtable.sty
+Package: longtable 2004/02/01 v4.11 Multi-page Table package (DPC)
+\LTleft=\skip45
+\LTright=\skip46
+\LTpre=\skip47
+\LTpost=\skip48
+\LTchunksize=\count89
+\LTcapwidth=\dimen111
+\LT@head=\box26
+\LT@firsthead=\box27
+\LT@foot=\box28
+\LT@lastfoot=\box29
+\LT@cols=\count90
+\LT@rows=\count91
+\c@LT@tables=\count92
+\c@LT@chunks=\count93
+\LT@p@ftn=\toks18
+)
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2000/07/18 v2.13 AMS math features
+\@mathmargin=\skip49
+
+For additional information on amsmath, use the `?' option.
+(/usr/share/texmf-texlive/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01
+
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0
+\@emptytoks=\toks19
+\ex@=\dimen112
+))
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d
+\pmbraise@=\dimen113
+)
+(/usr/share/texmf-texlive/tex/latex/amsmath/amsopn.sty
+Package: amsopn 1999/12/14 v2.01 operator names
+)
+\inf@bad=\count94
+LaTeX Info: Redefining \frac on input line 211.
+\uproot@=\count95
+\leftroot@=\count96
+LaTeX Info: Redefining \overline on input line 307.
+\classnum@=\count97
+\DOTSCASE@=\count98
+LaTeX Info: Redefining \ldots on input line 379.
+LaTeX Info: Redefining \dots on input line 382.
+LaTeX Info: Redefining \cdots on input line 467.
+\Mathstrutbox@=\box30
+\strutbox@=\box31
+\big@size=\dimen114
+LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
+\macc@depth=\count99
+\c@MaxMatrixCols=\count100
+\dotsspace@=\muskip10
+\c@parentequation=\count101
+\dspbrk@lvl=\count102
+\tag@help=\toks20
+\row@=\count103
+\column@=\count104
+\maxfields@=\count105
+\andhelp@=\toks21
+\eqnshift@=\dimen115
+\alignsep@=\dimen116
+\tagshift@=\dimen117
+\tagwidth@=\dimen118
+\totwidth@=\dimen119
+\lineht@=\dimen120
+\@envbody=\toks22
+\multlinegap=\skip50
+\multlinetaggap=\skip51
+\mathdisplay@stack=\toks23
+LaTeX Info: Redefining \[ on input line 2666.
+LaTeX Info: Redefining \] on input line 2667.
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks24
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/graphics.sty
+Package: graphics 2006/02/20 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf-texlive/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/etc/texmf/tex/latex/config/graphics.cfg
+File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+)
+Package graphics Info: Driver file: pdftex.def on input line 90.
+
+(/usr/share/texmf-texlive/tex/latex/pdftex-def/pdftex.def
+File: pdftex.def 2007/01/08 v0.04d Graphics/color for pdfTeX
+\Gread@gobject=\count106
+))
+\Gin@req@height=\dimen121
+\Gin@req@width=\dimen122
+)
+(/usr/share/texmf-texlive/tex/latex/graphics/color.sty
+Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
+
+(/etc/texmf/tex/latex/config/color.cfg
+File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
+)
+Package color Info: Driver file: pdftex.def on input line 130.
+)
+(/usr/share/texmf-texlive/tex/latex/multirow/multirow.sty
+\bigstrutjot=\dimen123
+)
+(/usr/share/texmf-texlive/tex/latex/base/ifthen.sty
+Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
+)
+(/usr/share/texmf-texlive/tex/latex/koma-script/typearea.sty
+Package: typearea 2006/07/30 v2.95b KOMA-Script package (type area)
+
+Package typearea, 2006/07/30 v2.95b KOMA-Script package (type area)
+                  Copyright (C) Frank Neukam, 1992-1994
+                  Copyright (C) Markus Kohm, 1994-2002
+
+(/usr/share/texmf-texlive/tex/latex/koma-script/scrkbase.sty
+Package: scrkbase 2006/07/30 v2.95b KOMA-Script package (basics and keyval use)
+
+
+(/usr/share/texmf-texlive/tex/latex/koma-script/scrlfile.sty
+Package: scrlfile 2006/03/28 v2.95 KOMA-Script package (loading files)
+
+Package scrlfile, 2006/03/28 v2.95 KOMA-Script package (loading files)
+                  Copyright (C) Markus Kohm
+
+))
+\ta@bcor=\skip52
+\ta@div=\count107
+Package scrkbase Info: You've used the obsolete option `letterpaper'.
+(scrkbase)             \KOMAoptions{paper=letter} will be used instead.
+(scrkbase)             You should do this change too on input line 419.
+\ta@hblk=\skip53
+\ta@vblk=\skip54
+\ta@temp=\skip55
+Package typearea Info: These are the values describing the layout:
+(typearea)             DIV  = 12
+(typearea)             BCOR = 0.0pt
+(typearea)             \paperwidth      = 614.295pt
+(typearea)              \textwidth      = 460.72128pt
+(typearea)              DIV-departure   = -9/100
+(typearea)              \evensidemargin = 4.51686pt
+(typearea)              \oddsidemargin  = 4.51686pt
+(typearea)             \paperheight     = 794.96999pt
+(typearea)              \textheight     = 606.5pt
+(typearea)              \topmargin      = -45.89749pt
+(typearea)              \headheight     = 18.125pt
+(typearea)              \headsep        = 21.75pt
+(typearea)              \topskip        = 12.0pt
+(typearea)              \footskip       = 50.75pt
+(typearea)              \baselineskip   = 14.5pt
+(typearea)              on input line 832.
+)
+\admonitionwidth=\skip56
+\docinfowidth=\skip57
+\locallinewidth=\skip58
+\lineblockindentation=\skip59
+ (/usr/share/texmf-texlive/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2007/02/07 v6.75r Hypertext links for LaTeX
+\@linkdim=\dimen124
+\Hy@linkcounter=\count108
+\Hy@pagecounter=\count109
+
+(/usr/share/texmf-texlive/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2007/02/07 v6.75r Hyperref: PDFDocEncoding definition (HO)
+)
+(/etc/texmf/tex/latex/config/hyperref.cfg
+File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
+)
+(/usr/share/texmf-texlive/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2006/08/22 v2.4 Connects package keyval with LaTeX options (
+HO)
+)
+Package hyperref Info: Option `colorlinks' set `true' on input line 2238.
+Package hyperref Info: Hyper figures OFF on input line 2288.
+Package hyperref Info: Link nesting OFF on input line 2293.
+Package hyperref Info: Hyper index ON on input line 2296.
+Package hyperref Info: Plain pages OFF on input line 2303.
+Package hyperref Info: Backreferencing OFF on input line 2308.
+
+Implicit mode ON; LaTeX internals redefined
+Package hyperref Info: Bookmarks ON on input line 2444.
+(/usr/share/texmf-texlive/tex/latex/ltxmisc/url.sty
+\Urlmuskip=\muskip11
+Package: url 2005/06/27  ver 3.2  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 2599.
+\Fld@menulength=\count110
+\Field@Width=\dimen125
+\Fld@charsize=\dimen126
+\Choice@toks=\toks25
+\Field@toks=\toks26
+Package hyperref Info: Hyper figures OFF on input line 3102.
+Package hyperref Info: Link nesting OFF on input line 3107.
+Package hyperref Info: Hyper index ON on input line 3110.
+Package hyperref Info: backreferencing OFF on input line 3117.
+Package hyperref Info: Link coloring ON on input line 3120.
+\Hy@abspage=\count111
+\c@Item=\count112
+)
+*hyperref using default driver hpdftex*
+(/usr/share/texmf-texlive/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2007/02/07 v6.75r Hyperref driver for pdfTeX
+\Fld@listcount=\count113
+) (./revised-html.aux)
+\openout1 = `revised-html.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 68.
+LaTeX Font Info:    ... okay on input line 68.
+Package hyperref Info: Link coloring ON on input line 68.
+
+(/usr/share/texmf-texlive/tex/latex/hyperref/nameref.sty
+Package: nameref 2006/12/27 v2.28 Cross-referencing by name of section
+
+(/usr/share/texmf-texlive/tex/latex/oberdiek/refcount.sty
+Package: refcount 2006/02/20 v3.0 Data extraction from references (HO)
+)
+\c@section@level=\count114
+)
+LaTeX Info: Redefining \ref on input line 68.
+LaTeX Info: Redefining \pageref on input line 68.
+ (./revised-html.out) (./revised-html.out)
+\@outlinefile=\write3
+\openout3 = `revised-html.out'.
+
+ (./revised-html.toc [1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2])
+\tf@toc=\write4
+\openout4 = `revised-html.toc'.
+
+LaTeX Font Info:    Try loading font information for OMS+aer on input line 138.
+
+ (/usr/share/texmf-texlive/tex/latex/ae/omsaer.fd
+File: omsaer.fd 1999/12/27
+)
+LaTeX Font Info:    Font shape `OMS/aer/m/n' in size <12> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 138.
+
+[3]
+LaTeX Font Info:    Try loading font information for T1+aett on input line 169.
+
+ (/usr/share/texmf-texlive/tex/latex/ae/t1aett.fd
+File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
+) [4]
+Overfull \hbox (34.68329pt too wide) in paragraph at lines 249--252
+\T1/aer/m/n/12 There are some ba-sic ex-am-ples of Scheme-Propagators pro-grams
+ in \T1/aett/m/n/12 core/example-networks.scm\T1/aer/m/n/12 ;
+ []
+
+[5]
+
+LaTeX Font Warning: Font shape `T1/aett/bx/n' undefined
+(Font)              using `T1/aett/m/n' instead on input line 304.
+
+
+Overfull \hbox (0.81462pt too wide) in paragraph at lines 304--308
+[]\T1/aer/m/n/12 Attaches a prop-a-ga-tor to the given bound-ary cells.
+ []
+
+[6] [7] [8]
+Overfull \hbox (2.74614pt too wide) in paragraph at lines 484--487
+[]\T1/aer/m/n/12 These are vari-adic ver-sions of \T1/aett/bx/n/12 p:id\T1/aer/
+m/n/12 . The
+ []
+
+
+Overfull \hbox (0.17809pt too wide) in paragraph at lines 488--496
+[]\T1/aer/m/n/12 Conditional prop-a-ga-
+ []
+
+
+Overfull \hbox (1.34206pt too wide) in paragraph at lines 498--501
+[]\T1/aer/m/n/12 Two-armed con-di-tional prop-a-ga-tion.
+ []
+
+
+Overfull \hbox (21.15414pt too wide) in paragraph at lines 503--507
+[]\T1/aer/m/n/12 Two-output-armed con-di-tional prop-
+ []
+
+
+Overfull \hbox (1.73877pt too wide) in paragraph at lines 531--536
+[]\T1/aer/m/n/12 Grabs the given \T1/aett/bx/n/12 cell \T1/aer/m/n/12 and de-
+ []
+
+[9]
+Overfull \hbox (11.32622pt too wide) in paragraph at lines 557--561
+[]\T1/aer/m/n/12 Constructs a prop-
+ []
+
+
+Overfull \hbox (4.07863pt too wide) in paragraph at lines 570--578
+[]\T1/aer/m/n/12 Makes a prop-a-ga-tor that iden-ti-fies the given \T1/aett/bx/
+n/12 out-
+ []
+
+[10] [11]
+Overfull \hbox (1.48691pt too wide) in paragraph at lines 664--670
+[]\T1/aer/m/n/12 Synthesizes one ad-di-tional con-strainee cell and at-taches p
+rop-
+ []
+
+[12] [13] [14]
+Overfull \hbox (13.00641pt too wide) in paragraph at lines 873--884
+[]\T1/aer/m/n/12 Delays the con-struc-tion of the body
+ []
+
+
+Overfull \hbox (12.10593pt too wide) in paragraph at lines 885--889
+[]\T1/aer/m/n/12 Expression-style vari-ant of \T1/aett/bx/n/12 p:when\T1/aer/m/
+n/12 .
+ []
+
+
+Overfull \hbox (14.39801pt too wide) in paragraph at lines 898--908
+[]\T1/aer/m/n/12 Two-armed con-di-tional
+ []
+
+[15]
+Overfull \hbox (5.30205pt too wide) in paragraph at lines 909--911
+[]\T1/aer/m/n/12 Expression-style vari-
+ []
+
+[16]
+Overfull \hbox (48.28871pt too wide) in paragraph at lines 974--976
+[]\T1/aett/bx/n/12 (p:my-sum-constraint x 3 z)  ==  (p:my-sum-constraint x (e:c
+onstant 3) z) 
+ []
+
+[17] [18] [19] [20] [21] [22]
+Overfull \hbox (4.93001pt too wide) in paragraph at lines 1405--1408
+[]\T1/aer/m/n/12 Scheme-Propagators syn-tax for anony-mous
+ []
+
+
+Overfull \hbox (1.40222pt too wide) in paragraph at lines 1409--1412
+[]\T1/aer/m/n/12 Internally pro-duces lambda-d:propagator or lambda-e:propagato
+r and
+ []
+
+[23]
+Overfull \hbox (9.70648pt too wide) in paragraph at lines 1460--1462
+[]\T1/aer/m/n/12 Whether the given con-tin-gency
+ []
+
+
+Overfull \hbox (5.11304pt too wide) in paragraph at lines 1505--1506
+[]\T1/aett/bx/n/12 (tms-query (con-tent maybe-frob))  ==>  #(con-tin-gent 4 (bi
+ll fred)) 
+ []
+
+[24]
+Overfull \hbox (5.71252pt too wide) in paragraph at lines 1552--1554
+[]\T1/aer/m/n/12 Any in-for-ma-tion state merges with \T1/aett/bx/n/12 the-cont
+radiction \T1/aer/m/n/12 to pro-duce \T1/aett/bx/n/12 the-contradiction\T1/aer/
+m/n/12 . 
+ []
+
+[25]
+Overfull \hbox (1.99016pt too wide) in paragraph at lines 1608--1612
+[]\T1/aer/m/n/12 An n-ary ver-sion of \T1/aett/bx/n/12 amb\T1/aer/m/n/12 . Pick
+s
+ []
+
+[26]
+Overfull \hbox (23.6169pt too wide) in paragraph at lines 1708--1709
+[]\T1/aett/bx/n/12 (defhandler merge (binary-flip number-in-interval) in-ter-va
+l? num-ber?) 
+ []
+
+[27]
+Overfull \hbox (0.38258pt too wide) in paragraph at lines 1745--1750
+[]\T1/aer/m/n/12 This is a Scheme macro that
+ []
+
+
+Overfull \hbox (20.8184pt too wide) in paragraph at lines 1763--1768
+[]\T1/aer/m/n/12 Declares that the given \T1/aett/bx/n/12 from-
+ []
+
+[28]
+Overfull \hbox (52.10953pt too wide) in paragraph at lines 1768--1770
+[]\T1/aett/bx/n/12 (declare-coercion num-ber? ->interval (lambda (x) (make-inte
+rval x x))) 
+ []
+
+
+Overfull \hbox (2.02644pt too wide) in paragraph at lines 1776--1783
+[]\T1/aer/m/n/12 The given generic op-er-a-tion must
+ []
+
+
+Overfull \hbox (9.59813pt too wide) in paragraph at lines 1786--1790
+\T1/aer/m/n/12 declares that in-ter-vals should be added by \T1/aett/bx/n/12 ad
+d-interval\T1/aer/m/n/12 , and that any-thing \T1/aett/bx/n/12 interval-
+ []
+
+[29]
+Overfull \hbox (15.1018pt too wide) in paragraph at lines 1850--1851
+[]\T1/aett/bx/n/12 (equivalent? (merge X (merge Y Z)) (merge (merge X Y) Z)) ==
+> #t 
+ []
+
+
+Overfull \hbox (8.93385pt too wide) in paragraph at lines 1862--1863
+[]\T1/aett/bx/n/12 (or (not (equiv-a-lent? X Y)) (equiv-a-lent? X (merge X Y)))
+ ==> #t 
+ []
+
+[30] [31]
+Overfull \hbox (55.1837pt too wide) in paragraph at lines 2007--2014
+[]\T1/aer/m/n/12 Scheme-Propagators has two built-in ef-fect types: \T1/aett/bx
+/n/12 cell-join-effect\T1/aer/m/n/12 , de-fined in \T1/aett/bx/n/12 core/cells.
+scm\T1/aer/m/n/12 ,
+ []
+
+[32]
+Overfull \hbox (18.2502pt too wide) in paragraph at lines 2053--2065
+[]\T1/aer/m/n/12 The \T1/aett/bx/n/12 generic-attach-
+ []
+
+
+Overfull \hbox (0.1658pt too wide) in paragraph at lines 2079--2089
+\T1/aett/bx/n/12 generic-/\T1/aer/m/n/12 , \T1/aett/bx/n/12 generic-=\T1/aer/m/
+n/12 , \T1/aett/bx/n/12 generic-<\T1/aer/m/n/12 , \T1/aett/bx/n/12 generic->\T1
+/aer/m/n/12 , \T1/aett/bx/n/12 generic-<=\T1/aer/m/n/12 , \T1/aett/bx/n/12 gene
+ric->=\T1/aer/m/n/12 , \T1/aett/bx/n/12 generic-
+ []
+
+
+Overfull \hbox (3.21866pt too wide) in paragraph at lines 2079--2089
+\T1/aett/bx/n/12 and\T1/aer/m/n/12 , \T1/aett/bx/n/12 generic-or\T1/aer/m/n/12 
+, \T1/aett/bx/n/12 generic-eq?\T1/aer/m/n/12 , \T1/aett/bx/n/12 generic-eqv?\T1
+/aer/m/n/12 , \T1/aett/bx/n/12 generic-expt\T1/aer/m/n/12 , and \T1/aett/bx/n/1
+2 generic-switch
+ []
+
+[33]
+Overfull \hbox (5.11304pt too wide) in paragraph at lines 2137--2138
+[]\T1/aett/bx/n/12 (defhandler binary-map contingency-binary-map con-tin-gency?
+ con-tin-
+ []
+
+[34] [35] [36]
+Overfull \hbox (23.6169pt too wide) in paragraph at lines 2276--2278
+[]\T1/aett/bx/n/12 (define-cell p:my-primitive (function->propagator-constructo
+r do-it)) 
+ []
+
+[37] [38] [39] [40] [41] [42] [43] [44]
+Overfull \hbox (2.17343pt too wide) in paragraph at lines 2792--2794
+[]\T1/aer/m/n/12 What is the least-commitment in-for-ma-tion struc-ture that ca
+p-tures all the knowl-
+ []
+
+[45]
+\c@listcnt0=\count115
+ [46] (./revised-html.bbl) [47] (./revised-html.aux)
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 4448 strings out of 94101
+ 59066 string characters out of 1165831
+ 128677 words of memory out of 1500000
+ 7497 multiletter control sequences out of 10000+50000
+ 36198 words of font info for 80 fonts, out of 1200000 for 2000
+ 637 hyphenation exceptions out of 8191
+ 28i,6n,36p,250b,462s stack positions out of 5000i,500n,6000p,200000b,5000s
+</usr/share/texmf-texlive/fonts/type1/bluesky/cm/cmbx10.pfb></usr/share/texmf
+-texlive/fonts/type1/bluesky/cm/cmbx12.pfb></usr/share/texmf-texlive/fonts/type
+1/bluesky/cm/cmr10.pfb></usr/share/texmf-texlive/fonts/type1/bluesky/cm/cmr12.p
+fb></usr/share/texmf-texlive/fonts/type1/bluesky/cm/cmr17.pfb></usr/share/texmf
+-texlive/fonts/type1/bluesky/cm/cmsy10.pfb></usr/share/texmf-texlive/fonts/type
+1/bluesky/cm/cmti12.pfb></usr/share/texmf-texlive/fonts/type1/bluesky/cm/cmtt12
+.pfb>
+Output written on revised-html.pdf (47 pages, 252515 bytes).
+PDF statistics:
+ 582 PDF objects out of 1000 (max. 8388607)
+ 112 named destinations out of 1000 (max. 131072)
+ 473 words of extra memory for PDF output out of 10000 (max. 10000000)
+

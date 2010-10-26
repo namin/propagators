@@ -1,0 +1,110 @@
+%%%% Alexey's general-purpose LaTeX stuff
+
+%% Paper size is a persistent annoyance.  The (current) suggested
+%% strategy is to always use letterpaper or a4paper options to
+%% documentclass, and see to it that \pdfpagewidth and \pdfpageheight
+%% get set correctly.  The color package, for example, does the
+%% latter.
+
+%% Also be sure to view the document at the right paper size with
+%% xdvi, and print it at the right paper size with dvips.
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage[usenames]{color}
+
+\usepackage{ifpdf}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{statement}[theorem]{Statement}
+\newtheorem{conjecture}[theorem]{Conjecture}
+
+\ifpdf
+  \DeclareGraphicsRule{.pdftex}{pdf}{.pdftex}{}
+\else
+\fi
+
+%%% Commands
+\newcommand{\code}[1]{{\tt #1}}
+\newcommand{\defn}[1]{{\bfseries{#1}}}
+\newcommand{\todo}[1]{{\bf *** TODO: {#1} ***}}
+%% The idea here is to mark todo items that will not be showstoppers
+%% if the todo comment just vanishes.
+\newcommand{\otodo}[1]{{\bf *** TODO (Optional): {#1} ***}}
+% \renewcommand{\otodo}[1]{{}}  % Like so.
+
+\def\caret{\^\,\hspace{-2pt}}
+
+%%% Shortcuts
+\newcommand{\be}{\begin{equation}}  %numbered equations
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\beas}{\begin{eqnarray*}}
+\newcommand{\eeas}{\end{eqnarray*}}
+\newcommand{\bl}{\begin{lisp}}
+\newcommand{\el}{\end{lisp}}
+\newcommand{\bls}{\begin{lisp*}}
+\newcommand{\els}{\end{lisp*}}
+\newcommand{\bv}{\begin{verbatim}{}}
+\newcommand{\ev}{\end{verbatim}{}}
+\newcommand{\LRa}{\ensuremath{\Leftrightarrow}}
+\newcommand{\Ra}{\ensuremath{\Rightarrow}}
+\newcommand{\La}{\ensuremath{\Leftarrow}}
+
+%%% Pictures
+\newlength{\pagepic}
+\setlength{\pagepic}{390pt}
+
+\newlength{\halfpagepic}
+\setlength{\halfpagepic}{210pt}
+
+\newcommand{\magicpicture}[1]{%
+\ifpdf
+  \input{pictures/#1.pdftex_t}
+\else
+  \input{pictures/#1.pstex_t}
+\fi}
+
+\newcommand{\diagram}[2]{%
+\begin{figure*}
+\begin{center}
+\includegraphics[width=\pagepic]{pictures/#1}
+\caption{{{#2}}}
+\label{fig:#1}
+\end{center}
+\end{figure*}
+}
+
+\newcommand{\magicdiagram}[2]{%
+\begin{figure*}
+\begin{center}
+\magicpicture{#1}
+\caption{{{#2}}}
+\label{fig:#1}
+\end{center}
+\end{figure*}
+}
+
+\newcommand{\twocaptiondiagram}[3]{%
+\begin{figure*}
+\begin{center}
+\magicpicture{#1}
+\caption[{{#2}}]{{{#3}}}
+\label{fig:#1}
+\end{center}
+\end{figure*}
+}
+
+%%% Floating controls.  See discussion at
+%%% http://dcwww.camd.dtu.dk/~schiotz/comp/LatexTips/LatexTips.html
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}

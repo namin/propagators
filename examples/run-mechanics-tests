@@ -1,0 +1,3 @@
+#!/bin/sh
+
+../extensions/mechanics --compiler -heap 6000 --batch-mode --no-init-file --eval '(set! load/suppress-loading-message? #t)' --eval '(begin (load "load") (load "test/mechanics-load") (show-time run-registered-tests) (newline) (flush-output) (%exit 0))'

@@ -1,0 +1,83 @@
+digraph G {
+  ratio=fill;
+  subgraph cluster_11 { label="top-group"; 
+    subgraph cluster_12 { label="product-constraint"; 
+      "prop-13" [label="/", shape="box" ];
+      "prop-17" [label="/", shape="box" ];
+      "prop-18" [label="*", shape="box" ];
+    }
+    subgraph cluster_19 { label="product-constraint"; 
+      "prop-20" [label="/", shape="box" ];
+      "prop-23" [label="/", shape="box" ];
+      "prop-24" [label="*", shape="box" ];
+    }
+    "cell-15" [label="ratio", shape="ellipse" ];
+    subgraph cluster_25 { label="product-constraint"; 
+      "prop-26" [label="/", shape="box" ];
+      "prop-29" [label="/", shape="box" ];
+      "prop-30" [label="*", shape="box" ];
+    }
+    subgraph cluster_31 { label="product-constraint"; 
+      "prop-32" [label="/", shape="box" ];
+      "prop-35" [label="/", shape="box" ];
+      "prop-36" [label="*", shape="box" ];
+    }
+    subgraph cluster_37 { label="quadratic-constraint"; 
+      "prop-38" [label="sqrt", shape="box" ];
+      "prop-40" [label="square", shape="box" ];
+    }
+    "prop-41" [label="(constant #(interval 1/2 1/2))", shape="box" ];
+    "prop-42" [label="(constant #(interval 9.789 9.832))", shape="box" ];
+    "cell-34" [label="g", shape="ellipse" ];
+    "cell-28" [label="one-half", shape="ellipse" ];
+    "cell-33" [label="t^2", shape="ellipse" ];
+    "cell-27" [label="gt^2", shape="ellipse" ];
+    "cell-16" [label="building-shadow", shape="ellipse" ];
+    "cell-22" [label="barometer-shadow", shape="ellipse" ];
+    "cell-21" [label="barometer-height", shape="ellipse" ];
+    "cell-14" [label="building-height", shape="ellipse" ];
+    "cell-39" [label="fall-time", shape="ellipse" ];
+  }
+  "cell-14" -> "prop-13" [label=0 ];
+  "cell-15" -> "prop-13" [label=1 ];
+  "prop-13" -> "cell-16" [label="" ];
+  "cell-14" -> "prop-17" [label=0 ];
+  "cell-16" -> "prop-17" [label=1 ];
+  "prop-17" -> "cell-15" [label="" ];
+  "cell-16" -> "prop-18" [label=0 ];
+  "cell-15" -> "prop-18" [label=1 ];
+  "prop-18" -> "cell-14" [label="" ];
+  "cell-21" -> "prop-20" [label=0 ];
+  "cell-15" -> "prop-20" [label=1 ];
+  "prop-20" -> "cell-22" [label="" ];
+  "cell-21" -> "prop-23" [label=0 ];
+  "cell-22" -> "prop-23" [label=1 ];
+  "prop-23" -> "cell-15" [label="" ];
+  "cell-22" -> "prop-24" [label=0 ];
+  "cell-15" -> "prop-24" [label=1 ];
+  "prop-24" -> "cell-21" [label="" ];
+  "cell-14" -> "prop-26" [label=0 ];
+  "cell-27" -> "prop-26" [label=1 ];
+  "prop-26" -> "cell-28" [label="" ];
+  "cell-14" -> "prop-29" [label=0 ];
+  "cell-28" -> "prop-29" [label=1 ];
+  "prop-29" -> "cell-27" [label="" ];
+  "cell-28" -> "prop-30" [label=0 ];
+  "cell-27" -> "prop-30" [label=1 ];
+  "prop-30" -> "cell-14" [label="" ];
+  "cell-27" -> "prop-32" [label=0 ];
+  "cell-33" -> "prop-32" [label=1 ];
+  "prop-32" -> "cell-34" [label="" ];
+  "cell-27" -> "prop-35" [label=0 ];
+  "cell-34" -> "prop-35" [label=1 ];
+  "prop-35" -> "cell-33" [label="" ];
+  "cell-34" -> "prop-36" [label=0 ];
+  "cell-33" -> "prop-36" [label=1 ];
+  "prop-36" -> "cell-27" [label="" ];
+  "cell-33" -> "prop-38" [label="" ];
+  "prop-38" -> "cell-39" [label="" ];
+  "cell-39" -> "prop-40" [label="" ];
+  "prop-40" -> "cell-33" [label="" ];
+  "prop-41" -> "cell-28" [label="" ];
+  "prop-42" -> "cell-34" [label="" ];
+}

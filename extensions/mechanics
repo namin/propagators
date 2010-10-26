@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+
+### ----------------------------------------------------------------------
+### Copyright 2009-2010 Alexey Radul.
+### ----------------------------------------------------------------------
+### This file is part of Propagator Network Prototype.
+### 
+### Propagator Network Prototype is free software; you can redistribute it and/or modify
+### it under the terms of the GNU General Public License as published by
+### the Free Software Foundation, either version 3 of the License, or
+### (at your option) any later version.
+### 
+### Propagator Network Prototype is distributed in the hope that it will be useful,
+### but WITHOUT ANY WARRANTY; without even the implied warranty of
+### MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+### GNU General Public License for more details.
+### 
+### You should have received a copy of the GNU General Public License
+### along with Propagator Network Prototype.  If not, see <http://www.gnu.org/licenses/>.
+### ----------------------------------------------------------------------
+
+# -*- ruby-mode -*-
+
+def root
+  ENV["SCMUTILS_ROOT"] || "/usr/local/scmutils"
+end
+
+def scheme
+  scheme = "#{root}/mit-scheme/bin/scheme"
+end
+
+def try_by_executable
+  fixed_opts = ["--library",
+    "#{root}/mit-scheme/lib",
+    "--heap",
+    "6000",
+    "--band",
+    "edwin-mechanics.com"
+  ]
+
+  if File.executable?(scheme)
+    exec scheme, *(fixed_opts + ARGV)
+  end
+end
+
+def mechanics_band
+  "/scmutils/linux/edwin-mechanics.com"
+end
+
+def mechanics_band64
+  "/scmutils/scheme-x86-64/edwin-mechanics.com"
+end
+
+def try_by_band(band)
+  fixed_opts = ["-constant",
+    "2000",
+    "-heap",
+    "10000",
+    "-band",
+    band
+  ]
+  if File.exist?(band)
+    exec "mit-scheme", *(fixed_opts + ARGV)
+  end
+end
+
+try_by_executable
+try_by_band("/sw" + mechanics_band)
+try_by_band("/usr/local"+ mechanics_band)
+try_by_band("/usr/local"+ mechanics_band64)
+puts "No Scheme at #{scheme} and no Mechanics bands at {/sw|/usr/local}#{mechanics_band} :("
+

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec ./mechanics --compiler -heap 6000 --batch-mode --no-init-file --eval '(set! load/suppress-loading-message? #t)' --load load.scm --load test/load --eval '(let ((v (show-time run-registered-tests))) (newline) (flush-output) (%exit v))'

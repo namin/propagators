@@ -1,0 +1,38 @@
+@import url(html4css1.css);
+
+body {
+  background: white;
+  font-family: verdana, arial, helvetica, sans-serif;
+  margin: 0px;
+  padding: 6px;
+}
+
+h1, h2 {
+  color: #333333;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-top: 0.0em;
+}
+
+p {
+  margin-top: 0.5em;
+  text-align: justify;
+}
+
+.document {
+  max-width: 50em;
+  margin: 0 auto;
+}
+
+/* People list */
+.people { overflow: auto; }
+.person {
+  float: left;
+  text-align: center;
+  padding: .5em;
+  width: 160px;
+  height: 180px;
+}
+.person img { height: 120px; }
+.person .name { font-weight: bold; }
+.person { font-size: 80%; }

@@ -1,0 +1,346 @@
+%%% ----------------------------------------------------------------------
+%%% Copyright 2009-2010 Alexey Radul.
+%%% ----------------------------------------------------------------------
+%%% This file is part of Propagator Network Prototype.
+%%% 
+%%% Propagator Network Prototype is free software; you can redistribute it and/or modify
+%%% it under the terms of the GNU General Public License as published by
+%%% the Free Software Foundation, either version 3 of the License, or
+%%% (at your option) any later version.
+%%% 
+%%% Propagator Network Prototype is distributed in the hope that it will be useful,
+%%% but WITHOUT ANY WARRANTY; without even the implied warranty of
+%%% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%%% GNU General Public License for more details.
+%%% 
+%%% You should have received a copy of the GNU General Public License
+%%% along with Propagator Network Prototype.  If not, see <http://www.gnu.org/licenses/>.
+%%% ----------------------------------------------------------------------
+
+\documentclass{article}
+
+% TODO Look through the thesis preamble and figure out a way to keep
+% *all* the TeX macros I find *generally* useful.
+
+\newcommand{\code}[1]{{\tt #1}}
+\newcommand{\todo}[1]{{\bf *** TODO: {#1} ***}}
+%% The idea here is to mark todo items that will not be showstoppers
+%% if the todo comment just vanishes.
+\newcommand{\otodo}[1]{{\bf *** TODO (Optional): {#1} ***}}
+\renewcommand{\otodo}[1]{{}}  % Like so.
+\newcommand{\defn}[1]{{\bfseries{#1}}}
+
+\title{Environments}
+\author{Alexey Radul}
+
+\begin{document}
+
+\maketitle
+
+\paragraph{Static vs Dynamic Distinction}
+A formal parameter written down in a program is a piece of text.
+It has an existence (of sorts) independently of the program ever
+being run, and certainly independently of the series of values
+that this formal parameter takes on as the procedure binding it is
+invoked over the run of the program.  Therefore, the values that
+parameter takes on need to be disambiguated, both from the
+parameter itself, and from each other.  (Dynamic scope does this
+purely chronologically, and therefore loses for many purposes).
+The parameter needs to correspond to many different locations over
+time.
+
+The standard Scheme hack for this disambiguation is environments.
+For every environment frame, for every variable, that frame either
+assigns that variable a value or does not.  Closures and higher
+order procedures work because each frame has a parent frame and,
+from the perspective of a single frame, all the knowledge of its
+parent frames is also available.  How are we to translate this to
+propagators?
+
+\paragraph{Propagators Invert Environment}
+Propagators as they are now begin by imposing a certain inversion
+on this story.  In propagator-world, the variables come first, and
+then the environments.  There is no structure that contains
+everything an environment frame contains, in which variables are
+looked up; instead, there may be (see below) a structure that
+contains everything a variable contains, and the environment
+frames are looked up in that.  It doesn't matter very much, but it
+can feel a bit unusual until one gets used to it.
+
+\paragraph{Physical Copies}
+At this point, propagators offer a choice.  One can implement
+environments and variables with one cell for each pair (variable,
+frame), and enough propagators to connect them all according to
+the program.  This is the \defn{physical copies} strategy from the
+thesis.  As presented in the thesis, this strategy inherits a
+certain single-valuedness from the host Scheme: Each variable gets
+a binding (= cell) at only one ``level'' in the environment
+hierarchy---its Scheme lexical depth.
+
+Physical copies works, but has the disadvantage that there is
+no representation of the variable itself, in the sense of the
+piece of program text.  So its different copies are not linked in
+any interesting way, and do not share any commonality except
+historical accident.  Likewise, environment frames only exist in
+the underlying Scheme procedures and the \code{compound-propagator}
+objects, and so are hard to get at to make closures.  And maybe,
+said closures will need access to the Scheme procedures that build
+wiring diagrams.  This is all somewhat strange and hard to think
+about.
+
+\paragraph{Virtual Copies}
+The extreme-opposite alternative is \defn{virtual copies}: one cell
+for each variable (piece of text), and a data structure in each such
+cell mapping environment frames to values (partial information, of
+course).  Then there is an explicit representation of the environment
+frames (objects, which are the keys of the maps held in the cells);
+and of the pieces of text which make up the program (said cells
+themselves).  For reference, when a cell's environment map contains a
+frame (even if there is no information in that frame), let's call that
+an \defn{occurrence} of that frame in that cell.  We are here choosing
+to distinguish between a frame that does not occur at all, and a frame
+that occurs but contains no information.
+
+In order to replicate the functionality of Scheme environments or of
+physical copies, the environment frame objects need to maintain links
+to their parent frames, just like Scheme environments.  If one uses
+virtual copies to exactly mimic the behavior of physical copies, one
+will find that they obey an interesting invariant, which we will call
+the \defn{lexical invariant} (because it is a consequence of lexical
+scope): In every cell, for every chain going up parent-frame links,
+there will be at most one occurrence of a frame.  This will be the
+virtual copy that implements the physical copy it corresponds to.  The
+behavior of Scheme or of physical copies is to find that occurrence
+and use the information there, but the virtual copies strategy offers,
+in principle, an immediate generalization: why not permit multiple
+occurrences and just merge everything one finds when traversing the
+chain of parents?  If, indeed, there is only one occurrence, this
+reproduces the Scheme behavior.  But the story is more general.  When
+looking at a cell in a frame, you can see everything all the ancestors
+know.  The door is thus cracked open to add other interesting kinds of
+behavior where parent frames contain information that informs but does
+not specify child frames.  This also lets one make sense of a world
+with multiple direct parents links: if one is merging everything
+anyway, there is no reason to worry about precedence of what way a
+search will go first.  One hopes that this will lead to a more
+flexible eventual story; but in the meantime, what needs to happen to
+replicate the behavior of physical copies?
+
+Aside: The environment frames are like TMS premises, except that
+there is an implication structure (i.e., this tag implies all of
+its parent tags), there is no notion of negation, and there is a
+presumption that they are all ``true'', and all expected to
+contribute usefully to whatever final result is sought.  Also,
+the frames need not be globally unique, but need only be unique to
+the individual abstractions whose virtual copies they represent.
+
+As in Scheme, environment frames need to be created only by the
+machines that implement abstraction boundaries and their crossings.
+It is also the responsibility of those machines to ensure that every
+necessary virtual copy of every necessary cell gets created
+appropriately.  In other words, new occurrences would not sprout
+willy-nilly.
+
+\paragraph{Virtual Copies of Propagators}
+In order for a single ``physical'' propagator to simulate the
+correct collection of ``virtual'' propagators, it must behave as
+follows: Collect all frames that occur in all its neighbor cells
+(including outputs; these frames must have been put there by some
+appropriate authority).  If the lexical invariant inherited from
+physical copies holds, at most one frame will occur for each cell
+on each upward parent chain.  Call a frame \defn{acceptable} if every
+neighbor (including outputs) has an occurrence in the chain of
+parents starting at that frame (inclusive).  An acceptable frame is \defn{good}
+if its parent is not acceptable (i.e., at least one of the needed
+occurrences was in the frame in question itself).\footnote{Actually,
+the idea of acceptability does not depend on the lexical invariant.
+The effect of the lexical invariant is simply to make acceptability
+and goodness boolean; but without it, one could have an acceptable
+frame whose parents are less acceptable because they see fewer
+occurrences.  Perhaps such frames should be called interesting,
+and computation should be done in them.}  Each 
+good frame should (I hope!) correspond to a physical propagator
+that would have been built by the physical copies mechanism, so
+that propagator needs to be simulated.  What that propagator would
+do is take all the information from the occurrences of the inputs
+that are visible from the good frame, compute the operation on
+them, and write that into the occurrences of the outputs that are
+visible from the good frame.  Note that this story, as told,
+correctly treats constants and amb propagators (which are now not exactly
+constant, because they need to create fresh premises for each
+frame that occurs in the output cell; that function could be split
+off into a (pair of) propagators that just creates the premises,
+and a separate amb that ``picks one'').
+
+There may be a mechanism of simulating the ``good frame'' analysis
+above using only the frames occurring in the inputs and playing
+some interesting merging games in the outputs, but I haven't
+invented that way yet.  Trying this could create some problems for
+constants and ambs.  If such trickery relied on considering which
+frames already occur in a cell, it would also need to avoid
+tripping up the activities of the abstraction boundary
+propagators, which do need to be able to create fresh frames and new occurrences.
+
+\paragraph{Closures}
+In the physical copies world, a closure is exactly a Scheme
+closure of a procedure that builds pieces of network diagram,
+closed over cells that are already provided; and is not directly
+available for the network to manipulate.  In the virtual copies
+world, the corresponding object needs to contain a list of cells
+for the boundary, and the environment frame in which the closure
+was constructed, and which will become the parent of fresh frames
+put into those cells.  The topmost frame therefore refers to the
+global environment (if there is one).
+
+\paragraph{Attachment Strategies}
+The physical copies world actually contains a choice.  Each
+network construction procedure can either embody a diagram with
+holes which it attaches directly to supplied ``argument'' cells, or
+a diagram without holes, which it connects to supplied ``argument''
+cells with identity propagators.  In the physical copies world as
+it currently stands this choice makes no difference, so the first
+(no connectors) is implemented.  Virtual copies, however, must
+rather mimic the second of these, because the physical cells that
+contain the virtual copies already exist, and there is no way to
+attach a virtual copy of a diagram with holes to existing virtual
+copies of cells on the caller side.
+
+\paragraph{Call Sites}
+Every call site is a propagator (or parallel set of propagators)
+that links the cells in the caller with the corresponding cells in
+the callee.  To simulate physical copies, each occurrence of a
+frame in a cell in the caller must correspond to one occurrence of
+a frame in the corresponding cell in the callee; and the
+connection propagators must both simulate the virtual identity
+propagators that connect existing virtual copies, and also create
+new virtual copies of the callee when needed.  To this end, the
+call site has a map C that converts frames in the caller into
+frames in the callee.  Note that caller frames create callee
+frames, but other callee frames do not create caller frames.  This
+agrees with the physical copies story.
+
+To perfectly mimic physical copies, a call site must not generate
+virtual copies of its callee until a frame appears that is good (as
+above) with respect to all the cells on the caller side of the
+boundary (including the cell that holds the closure to be called
+itself?); and until at least one of the slots in that frame contains
+some non-\code{nothing} information.
+When such a good frame appears, the call site must map all
+its constituent frames into the callee, making fresh frames as needed,
+and preserving the parenthood relationships within the good frame that
+prompts the transition (but not beyond it).  Further, the resulting
+tree in the callee must all be descendants of the frame closed over in
+the closure being called.  Note that this talk of good frames assumes
+the lexical invariant.  This strategy leads to a sort of partial
+evaluation (which was present in the physical copies world); an exact
+correspondence with Scheme behavior would have been to make one fresh
+frame in the callee for the whole pile of frames represented in the
+good frame in the caller, and make that one frame a child of the
+callee's closed-over frame.  The timing of when this structure in the
+callee is built might be fudgable; in particular, to mimic
+\code{compound-propagator}, it will be necessary for injection into
+the callee to wait until the caller has data in the good frame (and
+maybe even in its ``lowest level'', but then again maybe not).  I
+also wonder what will happen to this story if we go about relaxing the
+lexical invariant.
+
+The map C above must, of course, be synchronized across all cells
+on the boundary of an abstraction.  Perhaps that synchronization
+is the definition of ``boundary'' (because I sure haven't found any
+other definition!)  Also, the boundary can certainly be
+implemented with a single cell, if desired, which will have space
+for everything known about the input structure (positional
+arguments, keyword arguments, what have you) and everything known
+about the output structure (multiple values, multiple keyword
+values, what have you), and maybe even the request structure.
+
+\paragraph{Lambda Expressions}
+A propagator for a lambda expression needs to construct a closure
+object.  The expression itself presumably knows the cells that
+need to be put into the boundary, but the propagator also needs to
+read the frame in which the closure is being constructed
+(presumably the good frame with respect to the cell into which
+its output is supposed to go?) and capture that frame in the
+closure data structure.
+
+\paragraph{Additional Flavor}
+The story told so far allows the use of environment frames to
+``run'' a ``normal program'', where the ``physical'' network structure
+corresponds to the source code of the program, and the trace of
+environment frames corresponds to its execution.  (Is it enough
+for the cells to hold the keys of their virtual copies weakly in
+order to make the garbage collector appropriately forget finished
+function calls?)
+
+It seems one can also do things like type inference and
+flow analysis with the same mechanism, but, perhaps, different
+rules for how exactly the frames travel across abstraction
+boundaries.  Take type inference.  For every known quantity, there
+can be a constant propagator that emits its known type (which may
+be polymorphic, or include typeclasses, or whatever).  Then the
+stuff can flow around as it will.  We will then have a choice.  We
+can choose to allow the call-site maps C to forward type
+information as they will.  Then, probably, they will unroll all
+the calls and recursions infinitely, deducing the same things
+again and again in many different contexts.  We can choose to
+instruct the call-site maps C not to forward type information at
+all.  Then we will get standard type inference (especially if the
+(polymophic) type deduced for a function can be read at its call
+sites).  We may be able to play some interesting loop-detection
+games and solve some type-level equations, for example inferring
+the type of \code{map} from the recursion scheme available in lists and
+the recursion that \code{map} carries out.  Or we could turn the dial a
+bit differently, and get CFA (a la Shivers), where the frames
+represent the contexts, and maybe we will use some scheme to merge
+contexts to avoid infinite regress.
+
+It is tantalizing to think about letting ``dynamic'' information
+live in the same environment structure as ``static'' information.
+It may be possible to pull this off by making the ``run-time''
+frames be children of the appropriate ``type-inference-time''
+frames.  But I am not fully sure yet of how to make this hack
+work.  Are there different kinds of frames that each knows the
+rules for how that kind of frame interacts with abstraction
+boundaries?
+
+\paragraph{Efficiency Hacks}
+For efficiency, one may wish to use an updating mechanism, so that
+the propagators see which frames contained the changes that
+occurred since that propagator's last run, and only recompute in
+those frames, rather than the whole environment tree.  If this can
+be done statically enough, it may be possible to physically copy
+the propagators while virtually copying the cells.  Then there
+will be one copy that watches for changes in the environment
+backbone (i.e., the addition of a new frame) and one copy that
+watches each frame for changes; and is only alerted when the
+information to be had in the frame of interest is updated.
+
+There is a sub-choice here of how to implement the fact that each
+frame must know everything its ancestors know.  It can be done by
+each propagator performing a merge up the stack every time it
+wants to know something.  Then the propagators also need to be
+alerted when one of the ancestors learns something.  Or it could
+be done by each frame maintaining the full merge of itself and its
+ancestors.  Then there will need to be propagators (again copied
+either virtually or physically) that push information down the
+hierarchy whenever ancestors learn something.  (Is it just me or
+does this problem not happen in merge-free languages?  Also, can
+this last strategy be implemented in the physical copies world to
+relieve it of the ``only one frame'' invariant?)
+
+One of the appeals of this structure is that, since all
+descendants know everything all ancestors know, it may be possible
+(a) to avoid repeating in descendants computations that were
+already done in ancestors, and even (b) to eliminate segments of
+the descendants that would be dedicated to those computations.
+For example, if a type inference ancestor deduced the type of some
+argument, then it can do a generic dispatch once, and not require
+descendants to repeat it (so said descendants do not even need to
+be equipped with the machinery for doing that dispatch).  But
+since this kind of thing will work over any information structure,
+this story promises a very general kind of partial evaluation.
+Implementing this may lead to needing to adjust the diagrams that
+get built for children based on deductions made in the parents.
+And, of course, those adjustments may need to be conditional on
+partialness in the parents (e.g., TMS premises).
+\end{document}
