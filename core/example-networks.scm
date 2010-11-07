@@ -31,9 +31,7 @@
 #|
  (initialize-scheduler)
  (define-cell f)
- (define-cell c)
-
- (c:fahrenheit->celsius f c)
+ (define-cell c (e:fahrenheit->celsius f))
 
  (add-content f 77)
  (run)
