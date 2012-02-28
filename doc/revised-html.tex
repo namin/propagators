@@ -468,7 +468,7 @@ and output cells.  \texttt{p:abs}, \texttt{p:square}, \texttt{p:sqrt},
 \texttt{p:not}, \texttt{p:pair?}, and \texttt{p:null?} accept one input cell and one
 output cell.  \texttt{p:+}, \texttt{p:-}, \texttt{p:*}, \texttt{p:/}, \texttt{p:=}, \texttt{p:<},
 \texttt{p:>}, \texttt{p:<=}, \texttt{p:>=}, \texttt{p:and}, \texttt{p:or}, \texttt{p:eq?},
-\texttt{p:eqv?}, and \texttt{p:expt}, accept two input cells and one output
+\texttt{p:eqv?}, \texttt{p:atan2}, and \texttt{p:expt}, accept two input cells and one output
 cell.
 
 \item[{\texttt{(e:foo input ...)}}] \leavevmode 
@@ -500,7 +500,7 @@ Two-armed conditional propagation.  May be defined by use of two
 \texttt{switch} propagators and a \texttt{not} propagator.
 
 \item[{\texttt{(p:conditional-router control input consequent alternate)},}]
-\item[{\texttt{(p:conditional-router control input consequent)}}] \leavevmode 
+\item[{\texttt{(e:conditional-router control input consequent)}}] \leavevmode 
 Two-output-armed conditional propagation.  This is symmetric with
 \texttt{conditional}; the \texttt{consequent} and \texttt{alternate} are possible
 output destinations.
@@ -672,8 +672,18 @@ c:+~~~~~~~ce:+~~~~~~~ce:-~\\
 c:*~~~~~~~ce:*~~~~~~~ce:/~\\
 c:square~~ce:square~~ce:sqrt~\\
 c:not~~~~~ce:not~\\
+c:and~~~~~ce:and~\\
+c:or~~~~~~ce:or~\\
 c:id~~~~~~ce:id~\\
-c:==~~~~~~ce:==
+c:==~~~~~~ce:==~\\
+c:negate~~ce:negate~\\
+c:invert~~ce:invert~\\
+c:sin~~~~~ce:sin~\\
+c:cos~~~~~ce:cos~\\
+c:tan~~~~~ce:tan~\\
+c:exp~~~~~ce:exp~\\
+c:eq?~~~~~ce:eq~\\
+c:eqv?~~~~ce:eqv~
 }\end{quote}
 \end{description}
 
@@ -1286,6 +1296,13 @@ Two interval objects are \texttt{equivalent?} if they are the same
 interval.  An interval is \texttt{equivalent?} to a number if both the
 upper and lower bounds are that number.
 
+Arithmetic can be performed on intervals.  They can be compared, and
+the comparison predicates will have a truth value only when no future shrinkage
+of the intervals can change that value.  For example, \texttt{(e:< int1 int2)} will
+be true only if \texttt{(e:< (interval-high int1) (interval-low int2))}; it 
+will be false only if \texttt{(e:>= (interval-low int1) (interval-high int2))}; 
+otherwise the result of the comparison is \texttt{nothing}.
+
 Interval objects merge with each other by intersection.  Interval
 object merge with numbers by treating the number as a degenerate
 interval and performing intersection (whose result will either be that
@@ -1305,11 +1322,12 @@ non-\texttt{{\#}f} object and forwards its input to its output.
 It is an error for an interval object to appear in the operator
 position of an apply propagator.
 
-As an interval arithmetic facility, this one is very primitive.  In
-particular it assumes that all the numbers involved are positive.  The
-main purpose of including it is to have a partial information
-structure with an intuitive meaning, and that requires nontrivial
-operations on the information it is over.
+As an interval arithmetic facility, this one is very primitive.  It
+cannot extract new information from division by an interval that contains zero, because that 
+would require intervals around the point at infinity.
+The main purpose of including intervals is to have a partial
+information structure with an intuitive meaning, and that requires
+nontrivial operations on the information it is over.
 
 
 %___________________________________________________________________________

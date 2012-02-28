@@ -1,0 +1,1082 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 18 36 594 756
+%%Title: letter
+%%Creator: GNU enscript 1.6.4
+%%CreationDate: Mon Apr 25 18:14:35 2011
+%%Orientation: Portrait
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6 4
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6 4
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier-Bold /F-gs-font MF
+/F-gs-font 12 12 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6 4
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      5 0 moveto fname show
+      45 0 rmoveto fmodstr show
+      45 0 rmoveto pagenumstr show
+    } ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 576 def
+/d_page_h 720 def
+/d_header_x 0 def
+/d_header_y 705 def
+/d_header_w 576 def
+/d_header_h 15 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 576 def
+/d_footer_h 0 def
+/d_output_w 576 def
+/d_output_h 705 def
+/cols 1 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+18 36 translate
+/pagenum 1 def
+/fname (diagrams.scm) def
+/fdir () def
+/ftail (diagrams.scm) def
+% User defined strings:
+/fmodstr (Mon Apr 25 18:13:52 2011) def
+/pagenumstr (1) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 690 M
+(;;; ----------------------------------------------------------------------) s
+5 677 M
+(;;; Copyright 2011 Alexey Radul and Gerald Jay Sussman) s
+5 664 M
+(;;; ----------------------------------------------------------------------) s
+5 651 M
+(;;; This file is part of Propagator Network Prototype.) s
+5 638 M
+(;;; ) s
+5 625 M
+(;;; Propagator Network Prototype is free software; you can) s
+5 612 M
+(;;; redistribute it and/or modify it under the terms of the GNU) s
+5 599 M
+(;;; General Public License as published by the Free Software) s
+5 586 M
+(;;; Foundation, either version 3 of the License, or \(at your option\)) s
+5 573 M
+(;;; any later version.) s
+5 560 M
+(;;; ) s
+5 547 M
+(;;; Propagator Network Prototype is distributed in the hope that it) s
+5 534 M
+(;;; will be useful, but WITHOUT ANY WARRANTY; without even the implied) s
+5 521 M
+(;;; warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.) s
+5 508 M
+(;;; See the GNU General Public License for more details.) s
+5 495 M
+(;;; ) s
+5 482 M
+(;;; You should have received a copy of the GNU General Public License) s
+5 469 M
+(;;; along with Propagator Network Prototype.  If not, see) s
+5 456 M
+(;;; <http://www.gnu.org/licenses/>.) s
+5 443 M
+(;;; ----------------------------------------------------------------------) s
+5 417 M
+(\(declare \(usual-integrations make-cell cell?\)\)) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+18 36 translate
+/pagenum 2 def
+/fname (diagrams.scm) def
+/fdir () def
+/ftail (diagrams.scm) def
+% User defined strings:
+/fmodstr (Mon Apr 25 18:13:52 2011) def
+/pagenumstr (2) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 677 M
+(\(define-structure \(%diagram safe-accessors \(constructor %make-%diagram\)\)) s
+5 664 M
+(  identity) s
+5 651 M
+(  parts) s
+5 638 M
+(  promises) s
+5 625 M
+(  clubs\) ; These are the diagrams that have me as a part) s
+5 599 M
+(;; Cells are also diagrams, with trivial identity, no parts, and no) s
+5 586 M
+(;; promises.) s
+5 560 M
+(\(define \(diagram? thing\)) s
+5 547 M
+(  \(or \(%diagram? thing\)) s
+5 534 M
+(      \(cell? thing\)\)\)) s
+5 508 M
+(\(define \(diagram-identity thing\)) s
+5 495 M
+(  \(if \(%diagram? thing\)) s
+5 482 M
+(      \(%diagram-identity thing\)) s
+5 469 M
+(      thing\)\)) s
+5 443 M
+(\(define \(diagram-parts thing\)) s
+5 430 M
+(  \(if \(%diagram? thing\)) s
+5 417 M
+(      \(%diagram-parts thing\)) s
+5 404 M
+(      \(eq-get thing 'parts '\(\)\)\)\)) s
+5 378 M
+(\(define \(set-diagram-parts! thing new-parts\)) s
+5 365 M
+(  \(if \(%diagram? thing\)) s
+5 352 M
+(      \(set-%diagram-parts! thing new-parts\)) s
+5 339 M
+(      \(eq-put! thing 'parts new-parts\)\)\)) s
+5 313 M
+(\(define \(clear-diagram-parts! thing\)) s
+5 300 M
+(  \(set-diagram-parts! thing '\(\)\)\)) s
+5 274 M
+(\(define \(diagram-promises thing\)) s
+5 261 M
+(  \(if \(%diagram? thing\)) s
+5 248 M
+(      \(%diagram-promises thing\)) s
+5 235 M
+(      \(eq-get thing 'promises '\(\)\)\)\)) s
+5 209 M
+(\(define \(set-diagram-promises! thing new-promises\)) s
+5 196 M
+(  \(if \(%diagram? thing\)) s
+5 183 M
+(      \(set-%diagram-promises! thing new-promises\)) s
+5 170 M
+(      \(eq-put! thing 'promises new-promises\)\)\)) s
+5 144 M
+(\(define \(clear-diagram-promises! thing\)) s
+5 131 M
+(  \(set-diagram-promises! thing '\(\)\)\)) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+18 36 translate
+/pagenum 3 def
+/fname (diagrams.scm) def
+/fdir () def
+/ftail (diagrams.scm) def
+% User defined strings:
+/fmodstr (Mon Apr 25 18:13:52 2011) def
+/pagenumstr (3) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 677 M
+(\(define \(diagram-clubs thing\)) s
+5 664 M
+(  \(if \(%diagram? thing\)) s
+5 651 M
+(      \(%diagram-clubs thing\)) s
+5 638 M
+(      \(eq-get thing 'clubs '\(\)\)\)\)) s
+5 612 M
+(\(define \(set-diagram-clubs! thing new-clubs\)) s
+5 599 M
+(  \(if \(%diagram? thing\)) s
+5 586 M
+(      \(set-%diagram-clubs! thing new-clubs\)) s
+5 573 M
+(      \(eq-put! thing 'clubs new-clubs\)\)\)) s
+5 547 M
+(\(define \(clear-diagram-clubs! thing\)) s
+5 534 M
+(  \(set-diagram-clubs! thing '\(\)\)\)) s
+5 508 M
+(\(define \(add-diagram-club! thing club\)) s
+5 495 M
+(  \(diagram-set-clubs! thing \(lset-adjoin eq? club \(diagram-clubs thing\)\)\)\)) s
+5 469 M
+(\(define \(make-%diagram identity parts promises\)) s
+5 456 M
+(  \(let \(\(answer \(%make-%diagram identity parts promises '\(\)\)\)\)) s
+5 443 M
+(    ;; produces \(eq-adjoin! output 'shadow-connections the-propagator\)) s
+5 430 M
+(    \(for-each \(lambda \(part\)) s
+5 417 M
+(                \(add-diagram-club! part answer\)\)) s
+5 404 M
+(              \(map cdr parts\)\)) s
+5 391 M
+(    answer\)\)) s
+5 365 M
+(\(define \(make-compound-diagram identity parts\)) s
+5 352 M
+(  \(make-%diagram identity parts \(compute-derived-promises parts\)\)\)) s
+5 326 M
+(\(define \(compute-derived-promises parts\)) s
+5 313 M
+(  ;; TODO For every part that's a cell, I can promise not to read) s
+5 300 M
+(  ;; \(resp. write\) it if every part either doesn't mention it or) s
+5 287 M
+(  ;; promises not to read \(resp. write\) it.  See) s
+5 274 M
+(  ;; DO-COMPUTE-AGGREGATE-METADATA.  I just have to take due care to) s
+5 261 M
+(  ;; make sure that recursive parts are properly taken care of.) s
+5 248 M
+(  '\(\)\)) s
+5 222 M
+(\(define \(make-anonymous-i/o-diagram identity inputs outputs\)) s
+5 209 M
+(  \(define \(with-synthetic-names lst base\)) s
+5 196 M
+(    \(map cons) s
+5 183 M
+(         \(map symbol \(make-list \(length lst\) base\)) s
+5 170 M
+(              \(iota \(length lst\)\)\)) s
+5 157 M
+(         lst\)\)) s
+5 144 M
+(  \(let* \(\(parts \(append \(with-synthetic-names inputs 'input\)) s
+5 131 M
+(                        \(with-synthetic-names outputs 'output\)\)\)) s
+5 118 M
+(         \(boundary \(append inputs outputs\)\)) s
+5 105 M
+(         \(un-read \(lset-difference eq? boundary inputs\)\)) s
+5 92 M
+(         \(un-written \(lset-difference eq? boundary outputs\)\)\)) s
+5 79 M
+(    \(make-%diagram) s
+5 66 M
+(     identity) s
+5 53 M
+(     parts) s
+5 40 M
+(     \(append \(map promise-not-to-write un-written\)) s
+5 27 M
+(             \(map promise-not-to-read un-read\)\)\)\)\)) s
+_R
+S
+%%Page: (4) 4
+%%BeginPageSetup
+_S
+18 36 translate
+/pagenum 4 def
+/fname (diagrams.scm) def
+/fdir () def
+/ftail (diagrams.scm) def
+% User defined strings:
+/fmodstr (Mon Apr 25 18:13:52 2011) def
+/pagenumstr (4) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 677 M
+(;;;; Implicit diagram production) s
+5 651 M
+(\(define \(fresh-diagram\)) s
+5 638 M
+(  \(make-%diagram #f '\(\) '\(\)\)\)) s
+5 612 M
+(\(define *current-diagram* \(fresh-diagram\)\)) s
+5 586 M
+(\(define \(add-diagram-named-part! diagram name part\)) s
+5 573 M
+(  \(set-diagram-parts!) s
+5 560 M
+(   diagram) s
+5 547 M
+(   \(lset-adjoin equal? \(cons name part\) \(diagram-parts diagram\)\)\)) s
+5 534 M
+(  \(add-diagram-club! part diagram\)\)) s
+5 508 M
+(\(define \(note-diagram-part! diagram part\)) s
+5 495 M
+(  \(if \(memq part \(map cdr \(diagram-parts diagram\)\)\)) s
+5 482 M
+(      'ok) s
+5 469 M
+(      \(begin) s
+5 456 M
+(        \(set-diagram-parts! diagram) s
+5 443 M
+(         \(cons \(\(gensym\) part\) \(diagram-parts diagram\)\)\)) s
+5 430 M
+(        \(add-diagram-club! part diagram\)\)\)\)) s
+5 404 M
+(\(define \(network-register thing\)) s
+5 391 M
+(  \(note-diagram-part! *current-diagram* thing\)\)) s
+5 365 M
+(\(define \(in-diagram diagram thunk\)) s
+5 352 M
+(  \(if diagram) s
+5 339 M
+(      \(fluid-let \(\(*current-diagram* diagram\)\)) s
+5 326 M
+(        \(thunk\)\)) s
+5 313 M
+(      \(thunk\)\)\) ;; TODO What should I really do if there is no diagram?) s
+5 287 M
+(\(define \(with-diagram diagram thunk\)) s
+5 274 M
+(  \(network-register diagram\)) s
+5 261 M
+(  \(in-diagram diagram thunk\)\)) s
+5 235 M
+(\(define \(name-in-current-diagram! name part\)) s
+5 222 M
+(  \(add-diagram-named-part! *current-diagram* name part\)\)) s
+5 196 M
+(;; TODO network-unregister) s
+_R
+S
+%%Page: (5) 5
+%%BeginPageSetup
+_S
+18 36 translate
+/pagenum 5 def
+/fname (diagrams.scm) def
+/fdir () def
+/ftail (diagrams.scm) def
+% User defined strings:
+/fmodstr (Mon Apr 25 18:13:52 2011) def
+/pagenumstr (5) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 677 M
+(;;; Getting rid of diagrams when they are no longer needed requires) s
+5 664 M
+(;;; eliminating appropriate entries in the eq-properties table,) s
+5 651 M
+(;;; because those values would otherwise point back to themselves.) s
+5 625 M
+(\(define \(destroy-diagram! diagram\)) s
+5 612 M
+(  \(clear-diagram-clubs! diagram\)) s
+5 599 M
+(  \(clear-diagram-promises! diagram\)) s
+5 586 M
+(  \(for-each destroy-diagram! \(map cdr \(diagram-parts diagram\)\)\)) s
+5 573 M
+(  \(clear-diagram-parts! diagram\)\)) s
+5 547 M
+(\(define \(reset-diagrams!\)) s
+5 534 M
+(  \(destroy-diagram! *current-diagram*\)) s
+5 521 M
+(  \(set! *current-diagram* \(fresh-diagram\)\)\)) s
+5 495 M
+(;;; Restarting requires resetting the toplevel diagram) s
+5 482 M
+(\(define initialize-scheduler) s
+5 469 M
+(  \(let \(\(initialize-scheduler initialize-scheduler\)\)) s
+5 456 M
+(    \(lambda \(\)) s
+5 443 M
+(      \(initialize-scheduler\)) s
+5 430 M
+(      \(reset-diagrams!\)\)\)\)) s
+5 404 M
+(\(define with-independent-scheduler) s
+5 391 M
+(  \(let \(\(with-independent-scheduler with-independent-scheduler\)\)) s
+5 378 M
+(    \(lambda args) s
+5 365 M
+(      \(fluid-let \(\(*current-diagram* #f\)\)) s
+5 352 M
+(        \(apply with-independent-scheduler args\)\)\)\)\)) s
+5 326 M
+(;;;; New transmitters at the primitive-diagram level) s
+5 300 M
+(;;; In propagators.scm) s
+5 287 M
+(\(define \(function->propagator-constructor f\)) s
+5 274 M
+(  \(let \(\(n \(name f\)\)\)) s
+5 261 M
+(    \(define \(the-constructor . cells\)) s
+5 248 M
+(      \(let \(\(output \(ensure-cell \(last cells\)\)\)) s
+5 235 M
+(            \(inputs \(map ensure-cell \(except-last-pair cells\)\)\)\)) s
+5 222 M
+(        \(define \(the-propagator\)) s
+5 209 M
+(          \(fluid-let \(\(*active-propagator* the-propagator\)\)) s
+5 196 M
+(            \(add-content output) s
+5 183 M
+(                         \(apply f \(map content inputs\)\)) s
+5 170 M
+(                         the-propagator\)\)\)) s
+5 157 M
+(        \(name! the-propagator \(if \(symbol? n\)) s
+5 144 M
+(                                  \(symbol n ':p\)) s
+5 131 M
+(                                  f\)\)) s
+5 118 M
+(        \(propagator inputs the-propagator\)) s
+5 105 M
+(        \(make-anonymous-i/o-diagram propagator inputs \(list output\)\)\)\)) s
+5 92 M
+(    \(if \(symbol? n\) \(name! the-constructor \(symbol 'p: n\)\)\)) s
+5 79 M
+(    \(propagator-constructor! the-constructor\)\)\)) s
+_R
+S
+%%Page: (6) 6
+%%BeginPageSetup
+_S
+18 36 translate
+/pagenum 6 def
+/fname (diagrams.scm) def
+/fdir () def
+/ftail (diagrams.scm) def
+% User defined strings:
+/fmodstr (Mon Apr 25 18:13:52 2011) def
+/pagenumstr (6) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 677 M
+(\(define \(delayed-propagator-constructor prop-ctor\)) s
+5 664 M
+(  \(eq-clone! prop-ctor) s
+5 651 M
+(   \(lambda args) s
+5 638 M
+(     ;; TODO Can I autodetect "inputs" that should not trigger) s
+5 625 M
+(     ;; construction?) s
+5 612 M
+(     \(let \(\(args \(map ensure-cell args\)\)\)) s
+5 599 M
+(       \(define the-propagator) s
+5 586 M
+(         \(one-shot-propagator args) s
+5 573 M
+(          \(lambda \(\)) s
+5 560 M
+(            \(apply prop-ctor args\)\)\)\)) s
+5 547 M
+(       ;; This is the analogue of \(compute-aggregate-metadata prop-ctor args\)) s
+5 534 M
+(       ;; TODO much work can be saved by use of the diagram made by) s
+5 521 M
+(       ;; MAKE-COMPOUND-DIAGRAM.) s
+5 508 M
+(       \(make-diagram-for-compound-constructor) s
+5 495 M
+(        the-propagator prop-ctor arg-cells\)\)\)\)\)) s
+5 469 M
+(;; This is a peer of PROPAGATOR) s
+5 456 M
+(\(define \(one-shot-propagator neighbors action\)) s
+5 443 M
+(  \(let \(\(done? #f\) \(neighbors \(map ensure-cell \(listify neighbors\)\)\)\)) s
+5 430 M
+(    \(define \(test\)) s
+5 417 M
+(      \(if done?) s
+5 404 M
+(          'ok) s
+5 391 M
+(          \(if \(every nothing? \(map content neighbors\)\)) s
+5 378 M
+(              'ok) s
+5 365 M
+(              \(begin \(set! done? #t\)) s
+5 352 M
+(                     \(in-network-group \(network-group-of test\)) s
+5 339 M
+(                      \(lambda \(\)) s
+5 326 M
+(                        ;; The act of expansion makes the compound) s
+5 313 M
+(                        ;; itself uninteresting) s
+5 300 M
+(                        \(network-unregister test\)) s
+5 287 M
+(                        \(action\)\)\)\)\)\)\)) s
+5 274 M
+(    \(propagator neighbors test\)\)\)) s
+_R
+S
+%%Page: (7) 7
+%%BeginPageSetup
+_S
+18 36 translate
+/pagenum 7 def
+/fname (diagrams.scm) def
+/fdir () def
+/ftail (diagrams.scm) def
+% User defined strings:
+/fmodstr (Mon Apr 25 18:13:52 2011) def
+/pagenumstr (7) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 677 M
+(;;; In application.scm) s
+5 664 M
+(\(let \(\(the-propagator) s
+5 651 M
+(       \(lambda \(\)) s
+5 638 M
+(         \(\(unary-mapping) s
+5 625 M
+(           \(lambda \(prop\)) s
+5 612 M
+(             \(if \(done? prop\)) s
+5 599 M
+(                 unspecific) s
+5 586 M
+(                 \(attach prop\)\)\)\)) s
+5 573 M
+(          \(content prop-cell\)\)\)\)\)) s
+5 560 M
+(  \(name! the-propagator 'application\)) s
+5 547 M
+(  \(propagator prop-cell the-propagator\)) s
+5 534 M
+(  \(make-anonymous-i/o-diagram the-propagator \(list prop-cell\) arg-cells\)\)) s
+5 508 M
+(;;; In search.scm) s
+5 495 M
+(\(name! amb-choose 'amb-choose\)) s
+5 482 M
+(\(propagator cell amb-choose\) ; <-- No neighbors?) s
+5 469 M
+(\(make-anonymous-i/o-diagram amb-choose '\(\) \(list cell\)\)) s
+5 417 M
+(;; Various inspectors should use the diagram-clubs facility instead of) s
+5 404 M
+(;; the cell neighbors field, which, though somewhat redundant, is used) s
+5 391 M
+(;; for the scheduler and for a different purpose.) s
+5 365 M
+(;; Also, all analogues of function->propagator-constructor should be) s
+5 352 M
+(;; adjusted, and a new one made for compound propagators.) s
+5 326 M
+(;; ./core/propagators.scm:\(define \(propagator neighbors to-do\)  ) s
+5 313 M
+(;; ./core/propagators.scm:       \(propagator inputs                ; The outpu) s
+5 300 M
+(t isn't a neighbor!) s
+5 287 M
+(;; ./core/propagators.scm:      \(propagator inputs the-propagator\)\)\)) s
+5 274 M
+(;; ./core/propagators.scm:    \(propagator neighbors test\)\)\)) s
+5 261 M
+(;; ./core/application.scm:    \(propagator prop-cell the-propagator\)\)\)) s
+5 248 M
+(;; ./core/search.scm:    \(propagator cell amb-choose\)\)\)) s
+5 222 M
+(;; ./extensions/virtual-environments.scm:      \(propagator cells) s
+5 209 M
+(;; ./extensions/virtual-environments.scm:      \(propagator cells) s
+5 196 M
+(;; ./extensions/virtual-closures.scm:  \(propagator outside) s
+5 183 M
+(;; ./extensions/virtual-closures.scm:  \(propagator \(cons frame-map-cell outsid) s
+5 170 M
+(e\)) s
+5 157 M
+(;; ./extensions/virtual-closures.scm:  \(propagator \(list frame-map-cell outsid) s
+5 144 M
+(e\)) s
+5 131 M
+(;; ./extensions/virtual-closures.scm:  \(propagator \(list frame-map-cell inside) s
+5 118 M
+( outside\)) s
+5 105 M
+(;; ./extensions/virtual-closures.scm:    \(propagator \(cons* frame-map-cell clo) s
+5 92 M
+(sure-cell outside-cells\)) s
+5 79 M
+(;; ./extensions/virtual-closures.scm:  \(propagator output) s
+5 53 M
+(;; ./examples/masyu.scm:  \(propagator neighbors) s
+5 40 M
+(;; ./examples/masyu.scm:  \(propagator cells) s
+5 27 M
+(;; ./examples/masyu.scm:  \(propagator \(list far-left left right far-right\)) s
+5 14 M
+(;; ./examples/masyu.scm:  \(propagator \(list far-left left right far-right\)) s
+_R
+S
+%%Page: (8) 8
+%%BeginPageSetup
+_S
+18 36 translate
+/pagenum 8 def
+/fname (diagrams.scm) def
+/fdir () def
+/ftail (diagrams.scm) def
+% User defined strings:
+/fmodstr (Mon Apr 25 18:13:52 2011) def
+/pagenumstr (8) def
+/user_header_p false def
+/user_footer_p false def
+%%EndPageSetup
+do_header
+5 690 M
+(;; ./examples/selectors/selectors.scm:    \(propagator inputs the-propagator\)\)\)) s
+5 677 M
+(;; ./examples/selectors/selectors.scm:    \(propagator inputs the-propagator\)\)\)) s
+5 664 M
+(;; ./examples/selectors/selectors.scm:    \(propagator inputs the-propagator\)\)\)) s
+_R
+S
+%%Trailer
+%%Pages: 8
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF

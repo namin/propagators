@@ -204,7 +204,7 @@
 ;;; merit a little macro support.
 
 ;;; DEFINE-PROPAGATOR-SYNTAX is (meant to be) just like define, except
-;;; that it wraps the body being defined in a WITH-NETWORK-GROUP,
+;;; that it wraps the body being defined in a DIAGRAM-STYLE-WITH-DIAGRAM
 ;;; which is a hook for tagging all cells and propagators created
 ;;; inside the call with a common identity, which can then be passed
 ;;; on to the graph drawing tools used to inspect the network.
@@ -222,7 +222,7 @@
     ;; N.B. This is the clause that will match dot-notation argument lists
     ((define-propagator-syntax name body-form ...)
      (define name
-       (with-network-group (network-group-named 'name)
+       (expression-style-with-diagram (empty-diagram-cell 'name)
 	 (lambda ()
 	   body-form ...))))))
 
@@ -232,9 +232,9 @@
     ((named-propagator-syntax (name arg-form ...) body-form ...)
      (propagator-constructor!
       (named-lambda (name arg-form ...)
-	(with-network-group (network-group-named 'name)
+	(expression-style-with-diagram (empty-diagram-cell 'name)
 	 (lambda ()
-	   (name-locally! arg-form 'arg-form) ...
+	   (register-diagram arg-form 'arg-form) ...
 	   body-form ...)))))))
 
 ;;;; Defining compound propagators
@@ -286,7 +286,7 @@
   (syntax-rules ()
     ((naming-lambda (arg-form ...) body-form ...)
      (lambda (arg-form ...)
-       (name-locally! arg-form 'arg-form) ...
+       (register-diagram arg-form 'arg-form) ...
        body-form ...))))
 
 ;;; DEFINE-E:PROPAGATOR is just like DEFINE-PROPAGATOR, except that

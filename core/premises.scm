@@ -21,9 +21,23 @@
 
 (declare (usual-integrations make-cell cell?))
 
+(define (hypothetical-printer state object)
+  (with-current-unparser-state state
+    (lambda (port)
+      (write `(hypothetical
+	       ,(hash object)
+	       ,(hypothetical-sign object)
+	       ,(if (premise-in? object) 'in 'out)
+	       ,@(name-stack (hypothetical-cell object)))
+	  port))))
+
 (define-structure
   (hypothetical (type vector) (named 'hypothetical)
-                (print-procedure #f) (safe-accessors #t)))
+                ;;(print-procedure #f)
+		(print-procedure hypothetical-printer)
+		(safe-accessors #t))
+  sign
+  cell)
 
 (define *worldview-number* 0)
 (define *premise-outness* (make-eq-hash-table))

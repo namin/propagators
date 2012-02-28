@@ -48,26 +48,65 @@
 
 (propagatify +)
 (propagatify -)
-(propagatify *)
-(propagatify /)
-(propagatify =)
+;;;(propagatify *)  ;See below, to make more sophisticated version
+;;;(propagatify /)  ;See below, to make more sophisticated version
+;;;(propagatify =)  ;See below, to support floating comparisons...
 (propagatify <)
 (propagatify >)
 (propagatify <=)
 (propagatify >=)
 (propagatify atan2)
 
-;; Not using propagatify because the name AND names syntax, and I want
-;; the procedure BOOLEAN/AND
-(define generic-and (make-generic-operator 2 'and boolean/and))
-(define-cell p:and
-  (function->propagator-constructor (binary-mapping generic-and)))
-(define-cell e:and (expression-style-variant p:and))
-(define generic-or  (make-generic-operator 2 'or  boolean/or))
-(define-cell p:or
-  (function->propagator-constructor (binary-mapping generic-or)))
-(define-cell e:or (expression-style-variant p:or))
+; see ../support/utils for num=?
+(define generic-= (make-generic-operator 2 '= default-equal?)) 
+(define-cell p:=
+  (function->propagator-constructor (binary-mapping generic-=)))
+(define-cell e:= (expression-style-variant p:=))  
 
+;; Not using propagatify because the name AND names syntax, and I want
+;; the procedure BOOLEAN/AND.  Also, see more sophisticated version
+;; below.
+(define generic-and (make-generic-operator 2 'and boolean/and))
+(define-cell p:and-dumb
+  (function->propagator-constructor (binary-mapping generic-and)))
+(define-cell e:and-dumb (expression-style-variant p:and-dumb))
+(define generic-or  (make-generic-operator 2 'or  boolean/or))
+(define-cell p:or-dumb
+  (function->propagator-constructor (binary-mapping generic-or)))
+(define-cell e:or-dumb (expression-style-variant p:or-dumb))
+
+;;; DNA is to AND as division is to multiplication
+(define (boolean/dna c x)
+  (if (and (not c) x) #f nothing))
+(define generic-dna (make-generic-operator 2 'dna boolean/dna))
+(define-cell p:dna
+  (function->propagator-constructor (binary-mapping generic-dna)))
+(define-cell e:dna
+  (expression-style-variant p:dna))
+
+(define (boolean/imp a) (if a #t nothing))
+(define generic-imp (make-generic-operator 1 'imp boolean/imp))
+(define-cell p:imp
+  (function->propagator-constructor (unary-mapping generic-imp)))
+(define-cell e:imp
+  (expression-style-variant p:imp))
+
+;;; RO is to OR as division is to multiplication
+(define (boolean/ro c x)
+  (if (and c (not x)) #t nothing))
+(define generic-ro (make-generic-operator 2 'ro boolean/ro))
+(define-cell p:ro
+  (function->propagator-constructor (binary-mapping generic-ro)))
+(define-cell e:ro
+  (expression-style-variant p:ro))
+
+(define (boolean/pmi a) (if (not a) #f nothing))
+(define generic-pmi (make-generic-operator 1 'pmi boolean/pmi))
+(define-cell p:pmi
+  (function->propagator-constructor (unary-mapping generic-pmi)))
+(define-cell e:pmi
+  (expression-style-variant p:pmi))
+
 (propagatify eq?)
 (propagatify eqv?)
 (propagatify expt)
@@ -83,6 +122,9 @@
 (define-cell p:id (function->propagator-constructor identity))
 ; (define-cell p:id (function->propagator-constructor (nary-mapping identity)))
 (define-cell e:id (expression-style-variant p:id))
+
+(define same identity)
+(propagatify same)
 
 ;; TODO Do I still want to provide these old names for these things?
 (define constant p:constant) (define switch p:switch)
@@ -104,6 +146,63 @@
 (define conditional p:conditional)
 (define conditional-router p:conditional-router)
 (define conditional-wire p:conditional-wire)
+
+;;; Clever Propagators that know about short cuts.
+
+(define-propagator (p:or p1 p2 p)
+  (p:or-dumb p1 p2 p)
+  ;; Short cuts
+  (p:imp p1 p)
+  (p:imp p2 p))
+
+(define-propagator (p:and p1 p2 p)
+  (p:and-dumb p1 p2 p)
+  ;; Short cuts
+  (p:pmi p1 p)
+  (p:pmi p2 p))
+
+
+(define generic-* (make-generic-operator 2 '* *))
+(define-cell p:*-dumb
+  (function->propagator-constructor (binary-mapping generic-*)))
+(define-cell e:*-dumb (expression-style-variant p:*-dumb))
+
+(define-propagator (p:* m1 m2 product)
+  (p:*-dumb m1 m2 product)
+  ;; Short cuts
+  (p:switch (e:= m1 0) m1 product)
+  (p:switch (e:= m2 0) m2 product))
+
+
+
+(define generic-/ (make-generic-operator 2 '/ /))
+
+(define (numerical-zero? x) (and (number? x) (zero? x)))
+(declare-explicit-guard numerical-zero? (guard <number> zero?))
+
+(define (binary-nothing a b) nothing)
+
+(defhandler generic-/ binary-nothing numerical-zero? numerical-zero?)
+
+(define (numerical-non-zero? x) (and (number? x) (not (zero? x))))
+(declare-explicit-guard numerical-non-zero? (guard <number> numerical-non-zero?))
+
+(define (binary-contradiction a b) the-contradiction)
+
+(defhandler generic-/ binary-contradiction
+            numerical-non-zero? numerical-zero?)
+
+
+(define-cell p:/-dumb
+  (function->propagator-constructor (binary-mapping generic-/)))
+(define-cell e:/-dumb (expression-style-variant p:/-dumb))
+
+(define-propagator (p:/ product m1 m2)
+  (p:/-dumb product m1 m2)
+  ;; Short cut
+  (p:switch (e:and (e:= product 0)
+                   (e:not (e:= m1 0)))
+            product m2))
 
 ;;; Constraining propagators
 
@@ -128,9 +227,26 @@
 (define-propagator (c:not p1 p2)
   (p:not p1 p2)        (p:not p2 p1))
 
+(define-propagator (c:and p1 p2 p)
+  (p:and p1 p2 p)
+  (p:dna p p1 p2)
+  (p:dna p p2 p1)
+  (p:imp p p1)
+  (p:imp p p2))
+
+(define-propagator (c:or p1 p2 p)
+  (p:or p1 p2 p)
+  (p:ro p p1 p2)
+  (p:ro p p2 p1)
+  (p:pmi p p1)
+  (p:pmi p p2))
+
 (define-propagator (c:id c1 c2)
   (p:id c1 c2) (p:id c2 c1))
 
+(define-propagator (c:same c1 c2)
+  (p:same c1 c2) (p:same c2 c1))
+
 (define-cell p:==
   (propagator-constructor!
    (lambda args

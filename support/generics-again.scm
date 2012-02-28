@@ -39,6 +39,15 @@
     (set-operator-record! operator internal-generic)
     operator))
 
+(define *generic-operator-table*
+  (make-eq-hash-table))
+
+(define (get-operator-record operator)
+  (hash-table/get *generic-operator-table* operator #f))
+
+(define (set-operator-record! operator record)
+  (hash-table/put! *generic-operator-table* operator record))
+
 (define (procedure-arity-dispatch thing . options)
   (define (do-procedure-arity-dispatch arity)
     (let ((min (procedure-arity-min arity)))
@@ -182,9 +191,32 @@
       (or (search-tree-2 method-record arg1 arg2)
 	  (call-next-method arg1 arg2)))))
 
+(define (bind-in-tree keys handler tree)
+  (let loop ((keys keys) (tree tree))
+    (let ((p.v (assq (car keys) tree)))
+      (if (pair? (cdr keys))
+          (if p.v
+              (begin
+                (set-cdr! p.v
+                          (loop (cdr keys) (cdr p.v)))
+                tree)
+              (cons (cons (car keys)
+                          (loop (cdr keys) '()))
+                    tree))
+          (if p.v
+              (begin
+                (warn "Replacing a handler:" (cdr p.v) handler)
+                (set-cdr! p.v handler)
+                tree)
+              (cons (cons (car keys) handler)
+                    tree))))))
+
 (define-structure (guard (constructor guard))
   specializer
   procedure)
+
+(define (any? x)
+  #t)
 
 (define (desired-specializer guard)
   (define (given-specializer guard)

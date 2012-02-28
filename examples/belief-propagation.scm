@@ -185,7 +185,7 @@
   (list-ref (node-terminals node) index))
 
 (define (variable-at-node node name)
-  (with-network-group (network-group-named name)
+  (diagram-style-with-diagram (empty-diagram name)
     (lambda ()
       (variable (node-support node) (node-marginal node) (node-terminals node)))))
 

@@ -22,6 +22,7 @@
 (for-each load-relative
   '("scheduler-test"
     "core-test"
+    "metadata-test"
     "dependencies-test"
     "partial-compounds-test"
     "switches-test"

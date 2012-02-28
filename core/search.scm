@@ -22,48 +22,68 @@
 (declare (usual-integrations make-cell cell?))
 
 (define *false-premise-starts-out* #t)
-(define *avoid-false-true-flips* #t)
+(define *avoid-false-true-flips* #f)
 
 (define (binary-amb cell)
-  (let ((true-premise (make-hypothetical))
-        (false-premise (make-hypothetical)))
+  (let ((true-premise (make-hypothetical 'true cell))
+        (false-premise (make-hypothetical 'false cell)))
     (define (amb-choose)
       (if (and *avoid-false-true-flips*
 	       (or (premise-in? true-premise)
 		   (premise-in? false-premise)))
 	  'ok ; the some-premise-is-in invariant holds
 	  (let ((reasons-against-true
-		 (filter all-premises-in?
+		 (filter (lambda (nogood)
+			   (and (all-premises-in? nogood)
+				(not (member false-premise nogood))))
 			 (premise-nogoods true-premise)))
 		(reasons-against-false
-		 (filter all-premises-in?
+		 (filter (lambda (nogood)
+			   (and (all-premises-in? nogood)
+				(not (member true-premise nogood))))
 			 (premise-nogoods false-premise))))
 	    (cond ((null? reasons-against-true)
+		   (if *contradiction-wallp* 
+		       (pp `(asserting-true ,true-premise
+					    ,false-premise
+					    ,cell)))
 		   (kick-out! false-premise)
 		   (bring-in! true-premise))
 		  ((null? reasons-against-false)
+		   (if *contradiction-wallp* 
+		       (pp `(asserting-false ,true-premise
+					     ,false-premise
+					     ,cell)))
 		   (kick-out! true-premise)
 		   (bring-in! false-premise))
 		  (else			; this amb must fail.
+		   (if *contradiction-wallp* 
+		       (pp `(amb-fail ,true-premise ,false-premise ,cell)))
 		   (kick-out! true-premise)
 		   (kick-out! false-premise)
 		   (process-contradictions
 		    (pairwise-resolve reasons-against-true
 				      reasons-against-false)))))))
 
-    (eq-label! amb-choose 'name 'amb-choose 'outputs (list cell))
+    (name! amb-choose 'amb-choose)
     ;; This only affects run order, and only in some experimental
     ;; schedulers
     (tag-slow! amb-choose)
     (if *false-premise-starts-out*
 	;; Let's have the false premise start unbelieved.
 	(mark-premise-out! false-premise))
-    ((constant (make-tms
-                (list (supported #t (list true-premise))
-                      (supported #f (list false-premise)))))
-     cell)
+    
     ;; The cell is a spiritual neighbor...
-    (propagator cell amb-choose)))
+    (propagator cell amb-choose)
+
+    (let ((diagram
+	   (make-anonymous-i/o-diagram amb-choose '() (list cell))))
+      ((constant (make-tms
+		  (list (supported #t (list true-premise) (list diagram))
+			(supported #f (list false-premise) (list diagram)))))
+       cell)
+      (register-diagram diagram)
+      diagram)))
 
 (define (pairwise-resolve nogoods1 nogoods2)
   (append-map (lambda (nogood1)
@@ -79,10 +99,15 @@
             (length (filter hypothetical? nogood)))))))
 
 (define (process-one-contradiction nogood)
+  (if *contradiction-wallp* (pp `(nogood ,@nogood)))
   (let ((hyps (filter hypothetical? nogood)))
     (if (null? hyps)
-        (abort-process `(contradiction ,nogood))
+	(begin
+	  (if *contradiction-wallp* (pp 'nogood-aborted))
+	  (abort-process `(contradiction ,nogood)))
         (begin
+	  (if *contradiction-wallp*
+	      (pp `(kicking-out ,(car hyps))))
           (kick-out! (car hyps))
           (for-each (lambda (premise)
                       (assimilate-nogood! premise nogood))
@@ -113,6 +138,9 @@
     (lambda args
       (fluid-let ((*number-of-calls-to-fail* #f))
 	(apply with-independent-scheduler args)))))
+
+
+(define *contradiction-wallp* #f)
 
 (define (process-nogood! nogood)
   (set! *number-of-calls-to-fail*

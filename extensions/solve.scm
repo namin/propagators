@@ -89,6 +89,9 @@ The general strategy is:
 (define (substitutions solution) (caddr solution))
 (define (hopeless-variables solution) (cadddr solution))
 
+;;; The following is commented out to make the system work with the new version
+;;; of scmutils, but it breaks the old version.  We should fix.
+#;
 (define (solve-incremental equations variables #!optional substitutions hopeless)
   (if (default-object? substitutions) (set! substitutions '()))
   (if (default-object? hopeless) (set! hopeless '()))
@@ -326,8 +329,9 @@ The general strategy is:
 (define (equation-justifications eqn) (cadr eqn))
 (define (equation-variables eqn) (caddr eqn))
 
+(if (not (lexical-unbound? (the-environment) '*solve:contradiction-wallp*))
+    (set! *solve:contradiction-wallp* #f))
 (define *solve:contradiction-wallp* #f)
-
 
 (define (contradictory-eqn? eqn)
   (let ((expr (equation-expression eqn)))

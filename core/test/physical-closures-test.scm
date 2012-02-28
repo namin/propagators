@@ -378,7 +378,7 @@
      (run)
      (tms-query (content output))
      (produces #(supported 12 (fred)))
-     (check (equal? '(equivalent-closures? application)
+     (check (equal? '(equivalent-closures?:p application)
 		    (map name (neighbors the-op))))
 
      (kick-out! 'fred)
@@ -386,7 +386,7 @@
      (run)
      (tms-query (content output))
      (produces #(supported 7 (bill)))
-     (check (equal? '(equivalent-closures? equivalent-closures? application)
+     (check (equal? '(equivalent-closures?:p equivalent-closures?:p application)
 		    (map name (neighbors the-op))))
      ))
 

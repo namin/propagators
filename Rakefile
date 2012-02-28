@@ -46,7 +46,7 @@ task :doc do
   sh "cd #{File.dirname(__FILE__)}/doc; rake doc"
 end
 
-task :push do
+task :push => :release do
   sh "cp ../propagator.tar /afs/csail.mit.edu/group/mac/www/data/users/gjs/propagators/"
   sh "cp doc/revised-html.html /afs/csail.mit.edu/group/mac/www/data/users/gjs/propagators/"
   sh "cp doc/revised-html.html /afs/csail.mit.edu/group/mac/www/data/users/gjs/propagators/index.html"

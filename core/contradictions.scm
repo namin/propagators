@@ -36,6 +36,8 @@
 ;;; the effect of signaling a contradiction is being deferred from the
 ;;; point at which the worldview changes to the point at which some
 ;;; propagator tries to get the result.
+
+
 (define (tms-query tms)
   (let ((answer (strongest-consequence tms)))
     (let ((better-tms (tms-assimilate tms answer)))
@@ -47,6 +49,21 @@
 (define (check-consistent! v&s)
   (if (contradictory? v&s)
       (process-nogood! (v&s-support v&s))))
+
+#|
+;;; Sussman's tentative and unpleasant patch for Micah's bug.
+;;;  Required change to core/test/dependencies-test.scm.
+
+(define (tms-query tms)
+  (let ((answer (strongest-consequence tms)))
+    (let ((better-tms (tms-assimilate tms answer)))
+      (if (not (eq? tms better-tms))
+          (set-tms-values! tms (tms-values better-tms)))
+      (if (contradictory? answer)
+	  (begin (process-nogood! (v&s-support answer))
+		 nothing)
+	  answer))))
+|#
 
 ;; Will be replaced by process-nogood! in search.scm
 (define (process-nogood! nogood)

@@ -180,7 +180,8 @@
 		(%make-symbolic
 		 (generic-flatten (v&s-value the-value))
 		 (symbolic-metadata symbolic)))
-	       (v&s-support the-value))))))))
+	       (v&s-support the-value)
+	       (v&s-informants the-value))))))))
   (guard rtd:symbolic (lambda (thing) (tms? (symbolic-expression thing)))))
 
 ;;; The other way is the old school, adding methods to every generic

@@ -52,7 +52,7 @@
 
 (define p:amb binary-amb)
 (define (e:amb)
-  (let ((answer (make-named-cell 'cell)))
+  (let ((answer (make-named-cell (generate-cell-name))))
     (binary-amb answer)
     (eq-put! answer 'subexprs '())
     answer))

@@ -20,11 +20,12 @@
 ;;; ----------------------------------------------------------------------
 
 (define (self-relatively thunk)
-  (if (current-eval-unit #f)
-      (with-working-directory-pathname
-       (directory-namestring (current-load-pathname))
-       thunk)
-      (thunk)))
+  (let ((place (ignore-errors current-load-pathname)))
+    (if (pathname? place)
+	(with-working-directory-pathname
+	 (directory-namestring place)
+	 thunk)
+	(thunk))))
 
 (define (load-relative filename)
   (self-relatively (lambda () (load filename))))
@@ -33,7 +34,8 @@
 
 (for-each load-relative-compiled
   '("scheduler"
-    "metadata"
+    ;"metadata"
+    "diagrams"
     "merge-effects"
     "cells"
     "cell-sugar"
@@ -45,6 +47,10 @@
     "physical-closures"
     "standard-propagators"
     "carrying-cells"
+
+    ;;Intervals must follow standard-propagators in the load order
+    ;;because it depends on interval-non-zero?, numerical-zero?,
+    ;;binary-nothing, and binary-contradiction previously defined.
    
     "intervals"
     "premises"
@@ -53,6 +59,9 @@
     "contradictions"
     "search"
     "amb-utils"
+
+    "ui"
+    "explain"
 
     "example-networks"
     "test-utils"))

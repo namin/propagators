@@ -1,0 +1,364 @@
+\documentclass[12pt,letterpaper]{article}
+
+\input{preamble.tex}
+\author{Alexey Radul}
+\title{Cells, Compounds, and Closures}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+How should one represent partial information over compound data?
+This document describes the problem, the two alternatives, and why
+the propagator system chose one of them.
+\end{abstract}
+
+\section{The Question}
+
+Propagation of partial information is perfectly clear and sensible
+when the partial information is over atomic base data.  A truth
+maintenance system over numbers is a perfectly sensible object.  The
+history of propagation and data flow systems has no major
+disagreements about what to do with atoms.  Compound data, however,
+present more of a challenge.  Let us consider what to do with partial
+information over record structures (such as pairs made by \code{cons})
+and over closures---these turn out to evoke interestingly different
+intuitions about the right answer.  We will not consider compound
+structures with intended invariants, such as unordered sets, because
+there is enough trouble with just pairs and closures.
+
+So, what's the problem?  Well, what should the \code{cons} propagator
+do?  Clearly the output cell of the \code{cons} must learn that its
+object is a pair, and that the information in the two input cells of
+the \code{cons} is known about the respective fields of that pair.
+Furthermore, subsequent manipulations of that resulting information
+structure must be able to affect the pair as a whole: for example, the
+output of
+\begin{verbatim}
+(e:switch (contingent #t '(bill)) (e:cons 1 2))
+\end{verbatim}
+is only known to be a pair if we believe \code{bill}.
+
+There are two ways to arrange partial information over record
+structures like \code{cons}: recursive partial information, and
+partial information carrying cells.\footnote{Actually, there is also a
+  third, that might be called flat partial information.  While
+  conservative, it is grossly wasteful of information.  Since it is
+  clearly a bad idea, and since the propagator thesis already
+  discusses it, we will omit flat partial information from the present
+  text.}  Recursive partial information is the strategy of copying the
+partial information about the fields of the \code{cons} into those
+fields, and emitting into the output a pair that recursively contains
+whatever partial information was known about the fields.  For example,
+the program
+\begin{verbatim}
+(define-cell x (e:cons (make-interval 1 2)
+                       (make-tms (contingent 'foo '(bill)))))
+\end{verbatim}
+would put\footnote{Eventually, after all relevant propagators ran to quiescence.}
+into the cell \code{x} a partial information
+structure that is a pair, whose \code{car} field is an interval, and
+whose \code{cdr} field is a one-entry TMS that contains a contingent
+symbol.
+
+Partial information carrying cells is the strategy of directly
+grabbing the cells that contain the information about the fields of a
+structure and emitting a structure whose fields carry those cells.
+Under partial information carrying cells, the same program
+\begin{verbatim}
+(define-cell x (e:cons (make-interval 1 2)
+                       (make-tms (contingent 'foo '(bill)))))
+\end{verbatim}
+would (eventually) put into \code{x} a pair whose \code{car} is a
+cell that contained an interval, and whose \code{cdr} is a cell that
+contained a one-entry TMS.
+
+Which to choose?
+
+\section{The Options}
+
+Recursive partial information is appealingly safe.  The contents of
+every cell remains a data structure in the underlying implementation
+system; merging such data structures can be done by recursively
+calling \code{merge} because \code{merge} remains functional; the
+effects of every propagator are perfectly local.  If such a data
+structure acquires dependencies, for example by traveling through a
+conditional, they can be attached at the outermost level, and any
+attempt to access the guts will have to go through them.  Everything
+looks clean and nice.
+
+From the perspective of thinking about record structures (as opposed
+to closures), there is just one downside: if a field of some record
+structure gains new information, that new information has to be
+propagated by local steps through every propagator that manipulates
+the record structure, even though only the accessor at the end of this
+chain is interested in what that information actually is.  And
+unfortunately this effect is contagious: a field of a field of a field
+must be pushed around through every record in the whole tower.  This
+creates a large amount of uninteresting extra work.
+
+Partial information carrying cells avoids the extra recopying work,
+because an update into the cell holding information about a field of a
+datastructure is immediately visible in any place where that cell has
+been carried, without any effort on the part of the intermediate
+propagators on the path.  Partial information carrying cells is also
+intellectually appealing for the reason that propagator cells are
+meant to be analagous to memory locations in a conventional
+programming language, and the fields of a conventional record
+structure are memory locations, so the fields of a propagator record
+structure should, by symmetry, be cells.  Unfortunately, partial
+information carrying cells also creates a host of semantic problems.
+Those semantic problems will turn out to have an elegant solution, but
+let us first enumerate them.
+
+\todo{CONS is fundamentally nonlocal}
+
+First and least troublesome, carrying cells around just feels a little
+weird.  At the very least, we need to invent what a cell means when
+interpreted as itself being a partial information structure.  But this
+is a purely aesthetic concern.  Second, carrying cells introduces
+spooky action at a distance: a cell can be carried arbitrarily far,
+and then becomes a channel for instantaneous communication across that
+distance.  This is somewhat strange, but on the other hand, this was
+arguably the point, because the alternative is for that communication
+channel to be an emergent property of lots and lots of boring
+propagation of updates to fields of data structures.  There is an
+interesting issue of how to make that channel properly respect
+introduction of, say, dependencies on the way, but is subsumed by the
+most pressing problem with partial information carrying cells.
+
+The most pressing problem with partial information carrying cells is
+the question of how to merge the resulting structures.  Certainly a
+pair should be merged by merging its constituents; but how to merge
+two propagator cells?
+
+There is only one sensible way to merge two propagator cells.  If two
+cells are being merged, that means the program has discovered that the
+information they store is about the same entity.  Therefore, the thing
+to do is to attach identity propagators to those two cells, to keep
+their information equal in the future.\footnote{Theoretically, one
+  could imagine detaching all the propagators that read and write one
+  of them and attaching them to the other instead (and also copying
+  all the information currently present in the loser into the winner).
+  However, this is a pain to do when propagators are implemented as
+  Scheme closures, and still suffers from all the problems described
+  in the following text.}  The trouble is, this attachment of identity
+propagators needs to be sensitive to the context in which the merge is
+being done.  If, for example, the two cells in question are being
+merged contingently on some premise, then the forwarding of
+information from one to the other has to be kept contingent on the
+same premise.  But how should this be arranged?  If \code{merge} is to
+return the information structure that results from merging its two
+arguments, then it must do any necessary attaching itself, as a side
+effect.  But if it is to be called recursively from inside, say, a
+TMS, then it must be pure, so that the TMS can attach the premises it
+needs to attach to all the results of \code{merge}.  This conundrum,
+which turns out to have a solution that proved elegant but took time
+to think of, caused the propagator system described in the thesis to
+prefer the recursive partial information strategy.
+
+A note about closures.  A closure is a compound data structure whose
+fields correspond to the free variables of the expression being
+closed.  Therefore, the recursive partial information versus carrying
+cells question applies to closures as well.  A cell-carrying closure
+would contain the actual cells that were the free variables of the
+expression; a recursive partial information closure would contain the
+information present in those cells.  In the context of closures,
+grabbing the cells themselves feels much nicer, because the expression
+being closed may want to attach propagators to some of its free
+variables (for example, to compute something about them from some of
+its arguments); if so, the information those propagators compute
+should flow to the original cells holding those variables, and thence
+to any other closures or propagators that read those cells.  A closure
+that carried partial information rather than cells would need to
+always be treated bidirectionally by all the propagators that moved
+the closure itself around to arrange this, whereas a closure that
+carries cells provides that bidirectional channel automatically.
+\todo{Discuss the pros and cons of having cell merge produce
+  bidirectional links.  Leads to automatic unification of stuff
+  carried around in data structures --- is this ever undesirable?  Can
+  it be shut off?  (Maybe by manually inserting a unidirectional
+  copying frob somewhere...)}  Also, the \code{apply} propagator would
+have to do something interesting with recursive information closures,
+because if new partial information became available about the closed
+variables of a closure that had already been applied, it would need to
+be communicated into (and out of) the network created by that
+application.  We never did figure out a good way to arrange this, so
+the system built around recursive partial information did not have
+closures.
+
+\section{The Answer}
+
+The main problem with recursive partial information is essential to
+it: If \code{cons} has a purely local effect on information
+structures, then updating a field will require updating the compound.
+The main problem with partial information carrying cells, however, is
+conceptual: what does a cell mean as partial information?  How to
+merge cells in a functional way?  It turns out that the conceptual
+problem has a solution.
+
+What is a propagator cell, really?  It is a locus for storing all
+information known about some program entity.\footnote{Where a memory
+  location in a traditional programming language is a way to hold on
+  to a (fixed, known) program entity.}  Adding information to a cell
+is saying that the information being added is known to describe the
+entity that cell is responsible for.  If the cell already had some
+information about that entity, it concludes that \emph{both} of those
+pieces of information are known about that entity, and it must merge
+them to compute the new best information known about that entity.
+
+The story just presented suggests the following contract between
+\code{merge} and the cell: \code{merge} answers the question
+\begin{quote}
+``What is the least-commitment information structure that captures
+all the knowledge in these two information structures?''
+\end{quote}
+and the cell updates itself to contain the answer.  This \code{merge}
+is a pure function, and is therefore nice to deal with, including
+calling it recursively to handle partial information structures that
+contain other partial information structures.  However, this question
+has no answer when the structures being merged are themselves cells.
+A cell as partial information is not really just a pile of knowledge;
+it is something else.  Merging two cells does not cleanly produce a
+new pile of knowledge, because it must somehow connect the cells.
+This story is not adequate.
+
+Let us return to the propagator cell, then.  It is a locus for storing
+all information about some program entity, and adding information to
+it constitutes asserting that the new information also describes that
+entity.  But merely functionally merging information, and updating the
+cell to hold the merged information, is not enough to describe all the
+possible consequences of that discovery.  Learning that two
+cells-as-information are actually about the same object, for example,
+necessitates synchronizing them.
+
+The solution is to refine the contract between \code{merge} and the
+cell.  Now \code{merge} answers the question
+\begin{quote}
+``What needs to be done to the network in order to make it reflect the
+discovery that these two information structures are about the same
+object?''
+\end{quote}
+and the cell executes the answer.  This subsumes the previous
+interface, because the answer can just be ``update the cell
+responsible for that object to contain the following information
+structure.''  But now there is room for other answers: ``synchronize
+these two cells,'' or ``signal these premises as a nogood set.''
+
+With that question in mind as the question \code{merge} answers,
+\code{merge} can still be a pure function that can be used
+recursively.  The only extension is that it may return a data
+structure representing a side-effect that may need to be performed on
+the network, and any partial information structure whose merging
+recursively calls \code{merge} must take care to do the right things
+with those representations of side-effects.  But of course, with
+responsibility comes power: doing it this way gives that partial
+information structure the opportunity to adjust the side-effect to
+reflect the context in which it was called for.
+
+For example, suppose we are merging one pair contingent on the premise
+\code{bill} with another contingent on \code{fred}.  The code for
+merging the contingent objects intends to recursively merge the pairs
+and then attach the \code{bill} and \code{fred} dependencies to them.
+Merging the pairs is the assertion that the two pairs represent the
+same object, so their corresponding fields also represent the same
+objects; therefore we must recursively merge them.  Each field in each
+pair is a cell; each of these merges produces an object that requests
+that the corresponding cells be synchronized by connecting them with
+identity propagators.  The merge of the pairs concatenates those
+effects into one side-effect object that represents a request to do
+both of those things.  But now that side-effect-request object is
+handed to the contingency merge.  The thing the contingency merge must
+produce has to capture the idea that these two pairs we started with
+may represent the same object, but we are only sure of that if the
+\code{bill} and \code{fred} premises are believed.  In particular, all
+the consequences of merging those cells in that pair must be made
+contingent on those two premises.  One way to do that is, instead of
+attaching identity propagators to the cells to synchronize them, we
+can attach bidirectional \code{switch} propagators to synchornize the
+contents only if both the desired premises are believed.  Because of
+the way \code{switch} operates, the premises will get attached to the
+transmitted data, and the deductions made from the transmission along
+this bridge will remain contingent on those premises.
+
+Adopting this interface also solves a long-standing bug we had with
+our TMSes.  We had built our TMSes to signal nogood sets with a
+side-effect that occurred when the TMSes were merged.  This worked
+fine as long as the TMSes were always over atomic data, but would give
+the wrong answers if we had a pair of TMSes over compound structures
+that contained TMSes over fields, because any nogoods signalled by the
+recursive merges of the interior TMSes would be missing the
+dependencies carried for the structures themselves by the exterior
+ones.  But now, signalling a nogood set can also be a side-effect
+requested by a merge, which is returned until is gets all the way to
+the cell that actually initiated the merging; and so the exterior TMS
+has a chance to intercept it and attach more premises to it.
+
+\section{The Consequences}
+
+The meaning of a propagator cell as a partial information structure
+now becomes clear.  A cell is a locus for strong all information
+available about some program entity.  When one cell contains another,
+this is an indirection: it says ``The information about this entity is
+actually stored in \emph{this} cell.''  When two such cells are
+written as partial information into the same container cell, the
+meaning is ``\emph{Both} of these cells store information about my
+entity,'' and those cells must be connected.  This would happen most
+naturally if the entity one cell was responsible for was actually a
+pair, and two different cells were found to be responsible for its
+\code{car}, say.
+
+With this way of thinking about cells as partial information, we can
+further subdivide \code{cons}.  Instead of worrying about the strategy
+of \code{cons}, we can define a unary primitive called, say,
+\code{deposit}, that picks up its single argument cell and writes it
+as partial information into the cell holding its return value.  Then
+the partial information carrying cells strategy can be seen as a use
+pattern of the recursive partial information strategy, where all the
+fields of every \code{cons} propagator are required to be
+\code{deposit}ed cells, rather than any other partial information.
+Pleasantly, the inverse of \code{deposit} is also \code{deposit},
+because of the bidirectionality of the connections created by merging
+cells.  Accessors like \code{car}, however, do need to know whether
+the relevant field of the record being accessed is a cell, because if
+it is an inverse \code{deposit} suffices, but if it is not, they must
+actually access that field and write the result to their output cell.
+
+With the problem of merging cells solved, the only major obstacle to
+implementing closures disappears.  Just grab the cells holding the
+free variables and go.  Merge closures by checking that their
+expressions are equivalent (read: identical) and by merging the cells
+they close over.
+
+With this new contract for \code{merge} in place, the cell gains a
+clear role as the locus of side effects.  Only a cell may initiate a
+side-effect on the structure of the network, whereas the \code{merge}
+operation may not; but any cell may do so.  There is no single
+\code{IO} monad to thread through everything here; no hot-spot
+filtering all side-effects and imposing a total order on them.  Side
+effects on separate portions of the network structure can and should
+interleave in unspecified order, to avoid imposing spurious
+dependencies by specifying it.  It is up to the monotonicity of
+information to ensure that these ``race conditions'' at the network
+structure level do not cause non-deterministic behavior at the
+information level.
+
+Record structures that carry propagator cells that contain more
+records that carry more cells are like large record piles in
+conventional languages, but with an extra level of indirection.  The
+emergent behavior of merging such partial record structures is
+unification, with the carried cells serving the role of the
+unification variables.  Merging obeys the indirection, so merging two
+different cells differs from unifying two variables: instead of
+recurring on the structures they contain immediately, merging cells
+just attaches synchornization propagators to them.  As the network
+continues to run, the structures those cells contain will be merged,
+but a single \code{merge} will not do an unbounded amount of work.
+The indirection also removes the need for an occurs check:
+violating the occurs rule produces not an infinite but a cyclic data
+structure.  Representing the cyclic structure causes no trouble in
+itself, and leaves the reader with the opportunity to interpret the
+cycle usefully.
+
+\end{document}

@@ -36,8 +36,11 @@
    (lambda cells
      (let ((output (ensure-cell (car (last-pair cells))))
 	   (inputs (map ensure-cell (except-last-pair cells))))
-       (execute-propagator     ; To enable the early-access-hack below
-	((constant (apply f inputs)) output))))))
+       (let ((answer-diagram ((constant (apply f inputs)) output)))
+	 (execute-propagator   ; To enable the early-access-hack below
+	  (diagram-identity
+	   answer-diagram))
+	 answer-diagram)))))
 
 ;;; Type testers like pair? are just normal propagators.
 ;;; Accessors are just constructors in reverse, like this:

@@ -21,7 +21,7 @@
 
 (declare (usual-integrations make-cell cell?))
 
-(define-propagator (p:multiple-dwelling)
+(define-propagator-syntax (p:multiple-dwelling)
   (let-cells (baker cooper fletcher miller smith
 		    b=5 c=1 f=5 f=1 m>c sf fc one five s-f as-f f-c af-c)
     (one-of 1 2 3 4 5 baker)       (one-of 1 2 3 4 5 cooper)
@@ -55,7 +55,7 @@
 |#
 
 ;;; Here's how you write the same program in expression style
-(define-propagator (p:multiple-dwelling-expressions)
+(define-propagator-syntax (p:multiple-dwelling-expressions)
   (let-cells ((baker    (e:one-of 1 2 3 4 5))
 	      (cooper   (e:one-of 1 2 3 4 5))
 	      (fletcher (e:one-of 1 2 3 4 5))

@@ -195,7 +195,7 @@
 	 (e:name-of (lambda (thing)
 		      (e:knight-name (cell-of thing)))))
     (define (attach-names-to-table! pair)
-      (name-locally! (cdr pair) (car pair)))
+      (register-diagram (cdr pair) (car pair)))
     (map attach-names-to-table! cell-table)
     ;; This is how the depth-first version of this program specified
     ;; its knights-{shields|horses|names} bijections.

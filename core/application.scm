@@ -115,16 +115,13 @@
 	  prop (map (arg-copier pass?) input-cells))))))
   (define (attach prop)
     (set! done-props (cons prop done-props))
-    (with-network-group
-     (network-group-named `(attachment ,(name prop)))
-     (lambda ()
-       (let-cells (pass? key)
-	 (add-content key prop)
-	 (p:equivalent-closures? prop-cell key pass?)
-	 (if (diagram-style? prop)
-	     (apply-diagram-style prop pass? arg-cells)
-	     (apply-expression-style prop pass? arg-cells))
-	 unspecific))))
+    (let-cells (pass? key)
+      (add-content key prop)
+      (p:equivalent-closures? prop-cell key pass?)
+      (if (diagram-style? prop)
+	  (apply-diagram-style prop pass? arg-cells)
+	  (apply-expression-style prop pass? arg-cells))
+      unspecific))
   (let ((the-propagator
 	 (lambda ()
 	   ((unary-mapping
@@ -133,9 +130,11 @@
 		   unspecific
 		   (attach prop))))
 	    (content prop-cell)))))
-    (eq-label! the-propagator
-     'name 'application 'inputs (list prop-cell) 'outputs arg-cells)
-    (propagator prop-cell the-propagator)))
+    (name! the-propagator 'application)
+    (propagator prop-cell the-propagator)
+    (register-diagram
+     (make-anonymous-i/o-diagram
+      the-propagator (list prop-cell) arg-cells))))
 
 ;;; Eager application of objects that are fully known at network
 ;;; construction time.
@@ -195,11 +194,19 @@
   (c:== (car (last-pair boundary))
 	(proc (except-last-pair boundary))))
 
+
+(define generate-cell-name
+  (let ((cell-counter 0))
+    (lambda ()
+      (set! cell-counter (+ cell-counter 1))
+      (symbol 'cell cell-counter))))
+  
+
 (define (handle-implicit-cells inputs proc #!optional num-outputs)
   (if (default-object? num-outputs)
       (set! num-outputs 1))
   (define (manufacture-cell)
-    (eq-put! (make-named-cell 'cell) 'subexprs inputs))
+    (eq-put! (make-named-cell (generate-cell-name)) 'subexprs inputs))
   (define outputs (map (lambda (k) (manufacture-cell))
 		       (iota num-outputs)))
   (define true-inputs
@@ -255,12 +262,63 @@
 (define (do-apply-prop prop real-args)
   (let ((real-args (map ensure-cell real-args)))
     (cond ((closure? prop)
-	   (with-network-group (network-group-named (name prop))
-	     (lambda ()
-	       (apply (closure-code prop) real-args))))
+	   ((if (diagram-style? prop)
+		diagram-style-with-diagram
+		expression-style-with-diagram)
+	    (empty-diagram-cell prop)
+	    (lambda ()
+	      (apply (closure-code prop) real-args))))
 	  ((propagator-constructor? prop)
 	   (apply prop real-args))
 	  (else (error "Not an applicable propagator" thing)))))
+
+(define (diagram-style-with-diagram target-diagram-cell thunk)
+  (let ((explicit-diagram #f)
+	(target-diagram-cell
+	 (fluid-let ((register-diagram (diagram-inserter *metadiagram*)))
+	   (ensure-cell target-diagram-cell))))
+    (register-diagram
+     (fluid-let
+	 ((register-diagram (diagram-cell-inserter target-diagram-cell))
+	  (diagram
+	   (lambda args
+	     (let ((answer (apply make-compound-diagram args)))
+	       (set! explicit-diagram answer)
+	       answer))))
+       (thunk)
+       (or explicit-diagram
+	   ;; But the content hasn't updated yet!
+	   (compute-derived-promises! (content target-diagram-cell)))))))
+
+#|
+(define (expression-style-with-diagram target-diagram-cell thunk)
+  (let ((target-diagram-cell
+	 (let ((register-diagram (diagram-inserter *metadiagram*)))
+	   (ensure-cell target-diagram-cell))))
+    (fluid-let
+	((register-diagram (diagram-cell-inserter target-diagram-cell)))
+      (let ((answer (thunk)))
+	(register-diagram
+	 (compute-derived-promises! (content target-diagram-cell)))
+	answer))))
+|#
+
+;;; Previous version led to circular structure.
+
+(define (expression-style-with-diagram target-diagram-cell thunk)
+  (let ((target-diagram-cell
+	 (fluid-let ((register-diagram (diagram-inserter *metadiagram*)))
+	   (ensure-cell target-diagram-cell))))
+    (let ((answer 
+	   (fluid-let
+	       ((register-diagram (diagram-cell-inserter target-diagram-cell)))
+	     (let ((answer (thunk)))
+	       ;; But the content hasn't updated yet!
+	       (compute-derived-promises! (content target-diagram-cell))
+	       answer))))
+      (register-diagram (content target-diagram-cell))
+      answer)))
+
 
 (define (diagram-style? thing)
   (cond ((closure? thing)

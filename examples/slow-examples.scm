@@ -145,30 +145,34 @@
        #(knight sir-jules     ,s8 ,h8)
        #(knight sir-balthus   ,s9 ,h9))
      (map v&s-value (map tms-query (show-time find-solution)))))
-   (check (= *number-of-calls-to-fail* 399))
-   (check (= *worldview-number* 1358))))
+   (check (= *number-of-calls-to-fail* 488))
+   (check (= *worldview-number* 2410))))
 
 (in-test-group
  albatross-conundrum
  (define-test (correct-solution)
-   (check
-    (generic-match
-     '(#(deck poop     windlass  galliard-lute        rum)
-       #(deck quarter  scurvy    tamarind-jewels      biscuits)
-       #(deck main     bosun     calypso-figure       firearms)
-       #(deck gun      draconio  casket-of-magenta    ropes)
-       #(deck lower    kraken    goldenhall-talisman  spare-sails))
-     (map v&s-value (map tms-query (show-time find-albatross-solution)))))
-#|
-Also good:
-'(#(deck poop     windlass  galliard-lute        rum)
-  #(deck quarter  bosun     tamarind-jewels      biscuits)
-  #(deck main     draconio  calypso-figure       firearms)
-  #(deck gun      scurvy    casket-of-magenta    ropes)
-  #(deck lower    kraken    goldenhall-talisman  spare-sails))
-|#
-   (check (= *number-of-calls-to-fail* 803))
-   (check (= *worldview-number* 3098))))
+   (let ((answer (map v&s-value (map tms-query (show-time
+						find-albatross-solution)))))
+     (check
+      ;; The puzzle has two consistent assignments, and which one is
+      ;; found depends on propagator firing order.
+      (boolean/or
+       (generic-match
+	'(#(deck poop     windlass  galliard-lute        rum)
+	  #(deck quarter  scurvy    tamarind-jewels      biscuits)
+	  #(deck main     bosun     calypso-figure       firearms)
+	  #(deck gun      draconio  casket-of-magenta    ropes)
+	  #(deck lower    kraken    goldenhall-talisman  spare-sails))
+	answer)
+       (generic-match
+	'(#(deck poop     windlass  galliard-lute        rum)
+	  #(deck quarter  bosun     tamarind-jewels      biscuits)
+	  #(deck main     draconio  calypso-figure       firearms)
+	  #(deck gun      scurvy    casket-of-magenta    ropes)
+	  #(deck lower    kraken    goldenhall-talisman  spare-sails))
+	answer))))
+   (check (= *number-of-calls-to-fail* 607))
+   (check (= *worldview-number* 1858))))
 
 ;;; This one is too slow even for the slow-examples!
 #;

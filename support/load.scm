@@ -20,11 +20,12 @@
 ;;; ----------------------------------------------------------------------
 
 (define (self-relatively thunk)
-  (if (current-eval-unit #f)
-      (with-working-directory-pathname
-       (directory-namestring (current-load-pathname))
-       thunk)
-      (thunk)))
+  (let ((place (ignore-errors current-load-pathname)))
+    (if (pathname? place)
+	(with-working-directory-pathname
+	 (directory-namestring place)
+	 thunk)
+	(thunk))))
 
 (define (load-relative filename)
   (self-relatively (lambda () (load filename))))
@@ -39,7 +40,6 @@
   '("profiler"
     "mit-profile"
     "eq-properties"
-    "generic-system"
     "generics-again"
     "coercions"
     "insertion-order-sets"

@@ -20,6 +20,6 @@
 ;;; ----------------------------------------------------------------------
 
 (for-each load-relative
-  '(; "selectors-test"
+  '(;"selectors-test"
     "voltage-divider-test"
     "bridge-rectifier-test"))

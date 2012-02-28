@@ -87,7 +87,7 @@
 	 (e:supply-of (lambda (thing)
 			(e:deck-supply (cell-of thing)))))
     (define (attach-names-to-table! pair)
-      (name-locally! (cdr pair) (car pair)))
+      (register-diagram (cdr pair) (car pair)))
     (map attach-names-to-table! cell-table)
     (quadratic-guess-bijection deck-cells deck-commander-cells)
     (quadratic-guess-bijection deck-cells deck-treasure-cells)

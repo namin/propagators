@@ -73,19 +73,28 @@
 
 ;;;; Propagator cells
 
-(define (%make-cell)			; message-accepter style
-  (let ((neighbors '()) (content nothing))
-    (define (add-content increment)
+(define (%make-cell merge)		; message-accepter style
+  (let ((neighbors '()) (content nothing)
+	(whoiam #f) (history '())
+	(probe #f))
+    (define (add-content increment informant)
       (let ((info+effects (->effectful (merge content increment))))
         (let ((effects (effectful-effects info+effects))
 	      (new-content (effectful-info info+effects)))
+	  (if probe (probe))
 	  (cond ((eq? new-content content) 'ok)
 		((contradictory? new-content)
-		 (error "Ack! Inconsistency!" me increment)
+		 (error "Ack! Inconsistency!"
+			(name-stack whoiam) increment)
 		 'this-is-not-a-tail-call)
 		(else 
 		 (set! content new-content)
+		 ;; Two debugging aids.
 		 (eq-adjoin! content 'visited-cells me)
+		 (augment-history! whoiam informant new-content
+				   history
+				   (lambda (new)
+				     (set! history new)))
 		 (alert-propagators neighbors)))
 	  (for-each execute-effect effects))))
     (define (new-neighbor! new-neighbor)
@@ -98,30 +107,52 @@
             ((eq? message 'add-content) add-content)
             ((eq? message 'neighbors) neighbors)
             ((eq? message 'new-neighbor!) new-neighbor!)
+	    ((eq? message 'iam!)
+	     (lambda (who)
+	       (if whoiam (error "Psychotic cell!" who whoiam))
+	       (set! whoiam who)))
+	    ((eq? message 'who?) whoiam)
+	    ((eq? message 'history) history)
+	    ;; See ui.scm for probes.
+	    ((eq? message 'probe!) (lambda (p) (set! probe p)))
+	    ((eq? message 'unprobe!) (set! probe #f))
             (else (error "Unknown message" message))))
     me))
 
-(define (make-cell)
+(define (make-cell #!optional merger)
   (define me
     (make-entity
      (lambda (self . args)
        (apply application self args))
-     (%make-cell)))
+     (%make-cell
+      (if (default-object? merger)	;Sussman's crock escape hatch. 
+	  merge
+	  merger))))
   (eq-put! me 'cell #t)
-  (network-register me)
+  (((entity-extra me) 'iam!) me)
+  (register-diagram me)
   me)
-
+
 (define (content cell)
   ((entity-extra cell) 'content))
-(define (add-content cell increment)
-  (((entity-extra cell) 'add-content) increment))
+(define (add-content cell increment #!optional informant)
+  (((entity-extra cell) 'add-content) increment informant))
 (define (neighbors cell)
   ((entity-extra cell) 'neighbors))
 (define (new-neighbor! cell neighbor)
   (((entity-extra cell) 'new-neighbor!) neighbor))
+(define (who? cell)
+  ((entity-extra cell) 'who?))
+(define (history cell)
+  ((entity-extra cell) 'history))
 (define (cell? thing)
   (eq-get thing 'cell))
-
+
+;;; Default history collector collects the most recent informant only
+(define (augment-history! cell informant new-content old-history permission-to-set)
+  (permission-to-set `(,informant ,new-content)))
+
+
 (define (make-named-cell name)
   (name! (make-cell) name))
 
@@ -164,7 +195,7 @@
       (generic-equivalent? info1 info2)))
 
 (define generic-equivalent?
-  (make-generic-operator 2 'equivalent? eqv?))
+  (make-generic-operator 2 'equivalent? default-equal?))
 
 (set-operator-record! equivalent? (get-operator-record generic-equivalent?))
 
@@ -262,3 +293,98 @@
 			 control-info))))))
 
 (defhandler redundant-effect? boring-cell-join? cell-join-effect?)
+
+;;; Diagram merging
+
+(defhandler merge merge-diagram %diagram? %diagram?)
+(defhandler equivalent? diagram-equivalent? %diagram? %diagram?)
+
+;;; *metadiagram* is the toplevel-diagram for diagram cells.  It is
+;;; the only diagram that is not in a cell, and its only purpose is to
+;;; hold cells in which diagrams are contained to keep them out of
+;;; visualizations of the toplevel-diagram.
+(define *metadiagram* (empty-diagram 'metadiagram))
+
+;;; *toplevel-diagram-cell* is the cell containing the
+;;; toplevel-diagram.  It belongs to the *metadiagram*
+(define *toplevel-diagram-cell*
+  (fluid-let ((register-diagram (diagram-inserter *metadiagram*)))
+    (make-cell)))
+(add-content *toplevel-diagram-cell* *toplevel-diagram*)
+
+;;; Redefine diagram insertion in terms of operations on the
+;;; *toplevel-diagram-cell*
+(define (diagram-cell-inserter target-diagram-cell)
+  (lambda (subdiagram #!optional name)
+    ;;; Wrap the subdiagram in a diagram in a cell.
+    (let ((subdiagram-wrapper (empty-diagram 'wrapper)))
+      (if (default-object? name)
+	  (note-diagram-part! subdiagram-wrapper subdiagram)
+	  (add-diagram-named-part! subdiagram-wrapper name subdiagram))
+      (add-content target-diagram-cell subdiagram-wrapper))
+    subdiagram))
+
+(define (register-diagram subdiagram #!optional name)
+  ((diagram-cell-inserter *toplevel-diagram-cell*) subdiagram name))
+
+(define (reset-diagrams!)
+  ;; Clean out the metadiagram.
+  (destroy-diagram! *metadiagram*)
+  (set! *metadiagram* (empty-diagram 'metadiagram))
+  (fluid-let ((register-diagram (diagram-inserter *metadiagram*)))
+    ;; And then, reset the toplevel diagram.
+    (set! *toplevel-diagram-cell* (make-cell)))
+  ;; Hmmm...  This doesn't look monotonic.
+  (destroy-diagram! *toplevel-diagram*)
+  (set! *toplevel-diagram* (empty-diagram 'toplevel))
+  (set! register-diagram (diagram-cell-inserter *toplevel-diagram-cell*))
+  (add-content *toplevel-diagram-cell* *toplevel-diagram*))
+
+(define (empty-diagram-cell identity)
+  (let ((diagram-cell
+	 (fluid-let ((register-diagram (diagram-inserter *metadiagram*)))
+	   (make-cell))))
+    (add-content diagram-cell (make-%diagram identity '() '()))
+    diagram-cell))
+
+(define (do-make-diagram-for-compound-constructor identity prop-ctor args)
+  (with-independent-scheduler
+   (lambda ()
+     (let ((test-cell-map (map (lambda (arg)
+				 (cons (make-cell) arg))
+			       args)))
+       (fluid-let ((*interesting-cells* (map car test-cell-map)))
+	 (apply prop-ctor (map car test-cell-map)))
+       ;; The following code shouldn't execute until the diagram
+       ;; registrations from prop-ctor are reflected in the
+       ;; *toplevel-diagram-cell*
+       (propagator *toplevel-diagram-cell*
+	 (lambda ()
+	   ;; Specifically, we assume that there are parts to the
+	   ;; *toplevel-diagram*, so we need to wait until this is
+	   ;; true.
+	   (if (null? (diagram-parts (contents *toplevel-diagram-cell*)))
+	       'ok
+	       (let ((prop-ctor-diagram
+		      (car
+		       ;; There should only be one of these
+		       (filter (lambda (x) (not (cell? x)))
+			       (map cdr (diagram-parts
+					 (contents *toplevel-diagram-cell*)))))))
+		 (make-%diagram
+		  identity
+		  (map (lambda (name.part)
+			 (cons (car name.part)
+			       (cdr (assq (cdr name.part) test-cell-map))))
+		       (filter (lambda (name.part)
+				 (assq (cdr name.part) test-cell-map))
+			       (diagram-parts prop-ctor-diagram)))
+		  (map (lambda (promise)
+			 (retarget-promise
+			  promise
+			  (cdr (assq (diagram-promise-target promise)
+				     test-cell-map))))
+		       (filter (lambda (promise)
+				 (assq (diagram-promise-target promise)
+				       test-cell-map))
+			       (diagram-promises prop-ctor-diagram))))))))))))

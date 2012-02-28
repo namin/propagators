@@ -92,27 +92,34 @@
     (f y x)))
 
 (define (default-equal? x y)
-  (if (and (number? x) (number? y)
-	   (or (inexact? x) (inexact? y)))
-      (close-enuf? x y 1e-10)
+  (if (and (number? x) (number? y))
+      (num=? x y)
       (eqv? x y)))
 
-(define (close-enuf? h1 h2 #!optional tolerance scale)
-  (if (default-object? tolerance)
-      (set! tolerance *machine-epsilon*))
-  (if (default-object? scale)
-      (set! scale 1.0))
-  (<= (magnitude (- h1 h2))
-      (* tolerance
-         (+ (* 0.5
-               (+ (magnitude h1) (magnitude h2)))
-            scale))))
+(define (num=? x y)
+  (if (or (inexact? x) (inexact? y))
+      (close-enuf? x y)
+      (= x y)))
 
 (define *machine-epsilon*
   (let loop ((e 1.0))
      (if (= 1.0 (+ e 1.0))
          (* 2 e)
          (loop (/ e 2)))))
+
+(define default-tolerance (* 16 *machine-epsilon*))
+(define default-scale 1.0)
+
+(define (close-enuf? h1 h2 #!optional tolerance scale)
+  (if (default-object? tolerance)
+      (set! tolerance default-tolerance))
+  (if (default-object? scale)
+      (set! scale default-scale))
+  (<= (magnitude (- h1 h2))
+      (* tolerance
+         (+ (* 0.5
+               (+ (magnitude h1) (magnitude h2)))
+            scale))))
 
 (define (string-replace string pattern replacement)
   (let loop ((string string)
@@ -136,11 +143,14 @@
 	       (warn "Are you running Scheme with the default heap size?")
 	       (warn "Try, say, --heap 6000 if you run out of memory")))))
 
-(define (name thing)
+(define (default-name thing)
   (let ((name-property (eq-get thing 'name)))
     (if name-property
 	(name name-property)
 	thing)))
+
+(define name
+  (make-generic-operator 1 'name default-name))
 
 (define (name-stack thing)
   (let ((name-property (eq-get thing 'name)))

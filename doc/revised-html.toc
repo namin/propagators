@@ -17,35 +17,35 @@
 \contentsline {subsection}{\numberline {4.11}Conditional Network Construction}{15}{subsection.4.11}
 \contentsline {section}{\numberline {5}Making New Compound Propagators}{16}{section.5}
 \contentsline {subsection}{\numberline {5.1}Lexical Scope}{17}{subsection.5.1}
-\contentsline {subsection}{\numberline {5.2}Recursion}{17}{subsection.5.2}
-\contentsline {section}{\numberline {6}Using Partial Information}{18}{section.6}
+\contentsline {subsection}{\numberline {5.2}Recursion}{18}{subsection.5.2}
+\contentsline {section}{\numberline {6}Using Partial Information}{19}{section.6}
 \contentsline {section}{\numberline {7}Built-in Partial Information Structures}{20}{section.7}
-\contentsline {subsection}{\numberline {7.1}Nothing}{20}{subsection.7.1}
+\contentsline {subsection}{\numberline {7.1}Nothing}{21}{subsection.7.1}
 \contentsline {subsection}{\numberline {7.2}Just a Value}{21}{subsection.7.2}
 \contentsline {subsection}{\numberline {7.3}Numerical Intervals}{21}{subsection.7.3}
 \contentsline {subsection}{\numberline {7.4}Propagator Cells as Partial Information}{22}{subsection.7.4}
 \contentsline {subsection}{\numberline {7.5}Compound Data}{22}{subsection.7.5}
 \contentsline {subsection}{\numberline {7.6}Closures}{23}{subsection.7.6}
-\contentsline {subsection}{\numberline {7.7}Truth Maintenance Systems}{23}{subsection.7.7}
+\contentsline {subsection}{\numberline {7.7}Truth Maintenance Systems}{24}{subsection.7.7}
 \contentsline {subsection}{\numberline {7.8}Contradiction}{25}{subsection.7.8}
-\contentsline {subsection}{\numberline {7.9}Implicit Dependency-Directed Search}{25}{subsection.7.9}
-\contentsline {section}{\numberline {8}Making New Kinds of Partial Information}{26}{section.8}
-\contentsline {subsection}{\numberline {8.1}An Example: Adding Interval Arithmetic}{27}{subsection.8.1}
-\contentsline {subsection}{\numberline {8.2}Generic Coercions}{28}{subsection.8.2}
-\contentsline {subsection}{\numberline {8.3}The Partial Information Generics}{29}{subsection.8.3}
-\contentsline {subsubsection}{\numberline {8.3.1}The Full Story on Merge}{30}{subsubsection.8.3.1}
-\contentsline {subsection}{\numberline {8.4}Individual Propagator Generics}{33}{subsection.8.4}
+\contentsline {subsection}{\numberline {7.9}Implicit Dependency-Directed Search}{26}{subsection.7.9}
+\contentsline {section}{\numberline {8}Making New Kinds of Partial Information}{27}{section.8}
+\contentsline {subsection}{\numberline {8.1}An Example: Adding Interval Arithmetic}{28}{subsection.8.1}
+\contentsline {subsection}{\numberline {8.2}Generic Coercions}{29}{subsection.8.2}
+\contentsline {subsection}{\numberline {8.3}The Partial Information Generics}{30}{subsection.8.3}
+\contentsline {subsubsection}{\numberline {8.3.1}The Full Story on Merge}{31}{subsubsection.8.3.1}
+\contentsline {subsection}{\numberline {8.4}Individual Propagator Generics}{34}{subsection.8.4}
 \contentsline {subsection}{\numberline {8.5}Uniform Applicative Extension of Propagators}{34}{subsection.8.5}
 \contentsline {subsection}{\numberline {8.6}Interoperation with Existing Partial Information Types}{35}{subsection.8.6}
-\contentsline {section}{\numberline {9}Making New Primitive Propagators}{36}{section.9}
-\contentsline {subsection}{\numberline {9.1}Direct Construction from Functions}{36}{subsection.9.1}
-\contentsline {subsubsection}{\numberline {9.1.1}Expression Style Variants}{37}{subsubsection.9.1.1}
-\contentsline {subsection}{\numberline {9.2}Propagatify}{37}{subsection.9.2}
-\contentsline {subsection}{\numberline {9.3}Compound Cell Carrier Construction}{38}{subsection.9.3}
+\contentsline {section}{\numberline {9}Making New Primitive Propagators}{37}{section.9}
+\contentsline {subsection}{\numberline {9.1}Direct Construction from Functions}{37}{subsection.9.1}
+\contentsline {subsubsection}{\numberline {9.1.1}Expression Style Variants}{38}{subsubsection.9.1.1}
+\contentsline {subsection}{\numberline {9.2}Propagatify}{38}{subsection.9.2}
+\contentsline {subsection}{\numberline {9.3}Compound Cell Carrier Construction}{39}{subsection.9.3}
 \contentsline {subsection}{\numberline {9.4}Fully-manual Low-level Propagator Construction}{39}{subsection.9.4}
 \contentsline {section}{\numberline {10}Debugging}{39}{section.10}
-\contentsline {section}{\numberline {11}Miscellany}{40}{section.11}
-\contentsline {subsection}{\numberline {11.1}Macrology}{40}{subsection.11.1}
+\contentsline {section}{\numberline {11}Miscellany}{41}{section.11}
+\contentsline {subsection}{\numberline {11.1}Macrology}{41}{subsection.11.1}
 \contentsline {subsection}{\numberline {11.2}Reboots}{41}{subsection.11.2}
 \contentsline {subsection}{\numberline {11.3}Compiling}{42}{subsection.11.3}
 \contentsline {subsection}{\numberline {11.4}Scmutils}{42}{subsection.11.4}

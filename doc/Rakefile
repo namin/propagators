@@ -2,18 +2,11 @@
 # The modification is to remove the dependency on the
 # :{eps/pdf}pictures tasks, on the suspicion that that dependency was
 # causing spurious re-texing.
-def latex filename
-  desc "LaTeX #{filename}.tex"
-  file "#{filename}.dvi" => ["#{filename}.tex"] do
-    sh "latex #{filename}.tex"
-  end
-  task :latex => "#{filename}.dvi"
-end
-
+# Also using rubber instead of pdflatex.
 def pdflatex filename
   desc "LaTeX #{filename}.tex to a PDF"
   file "#{filename}.pdf" => ["#{filename}.tex"] do
-    sh "pdflatex #{filename}.tex"
+    sh "rubber --pdf #{filename}.tex"
   end
   task :pdflatex => "#{filename}.pdf"
 end
@@ -37,15 +30,6 @@ def autobib filename
 end
 # End copied definitions
 
-def rstify filename
-  file "#{filename}.html" => ["#{filename}.rst", "style.css"] do
-    sh "rst2html --stylesheet style.css #{filename}.rst > #{filename}.html"
-  end
-  task :doc => "#{filename}.html"
-end
-
-rstify "programmer-guide"
-
 task :doc => :pdflatex
 
 pdflatex "revised"
@@ -56,8 +40,7 @@ file "revised-html.tex" => "revised.tex" do
 end
 
 file "revised-html/revised-html.html" => "revised-html.tex" do
-  sh "pdflatex revised-html.tex"
-  sh "bibtex revised-html"
+  sh "rubber --pdf revised-html.tex"
   sh "latex2html -split 0 -nonavigation revised-html"
 end
 

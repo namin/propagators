@@ -1,0 +1,59 @@
+;;; in depends.scm figure out ????
+
+
+
+
+cd metacirc/prop/
+gjs@maharal:prop$ fgrep "v&s" */*.scm
+core/contradictions.scm:		    (v&s-support consequence)))))))))
+core/contradictions.scm:(define (check-consistent! v&s)
+core/contradictions.scm:  (if (contradictory? v&s)
+core/contradictions.scm:      (process-nogood! (v&s-support v&s))))
+core/truth-maintenance.scm:        ((v&s? stuff) (tms-assimilate-one tms stuff))
+core/truth-maintenance.scm:(define (subsumes? v&s1 v&s2)
+core/truth-maintenance.scm:  (and (lset<= eq? (v&s-support v&s1) (v&s-support v&s2))
+core/truth-maintenance.scm:       (implies? (v&s-value v&s1) (v&s-value v&s2))))
+core/truth-maintenance.scm:(define (tms-assimilate-one tms v&s)
+core/truth-maintenance.scm:  (if (any (lambda (old-v&s) (subsumes? old-v&s v&s))
+core/truth-maintenance.scm:             (filter (lambda (old-v&s) (subsumes? v&s old-v&s))
+core/truth-maintenance.scm:           v&s)))))
+core/truth-maintenance.scm:  (let ((relevant-v&ss
+core/truth-maintenance.scm:         (filter v&s-believed? (tms-values tms))))
+core/truth-maintenance.scm:    (merge* relevant-v&ss)))
+core/truth-maintenance.scm:(define (v&s-believed? v&s)
+core/truth-maintenance.scm:  (all-premises-in? (v&s-support v&s)))
+core/truth-maintenance.scm:(define contingency-object-believed? v&s-believed?)
+core/truth-maintenance.scm:  (lambda (v&s)
+core/truth-maintenance.scm:       (supported (tms-query (v&s-value v&s)) (v&s-support v&s))))))
+core/truth-maintenance.scm:  (lambda (thing) (and (v&s? thing) (tms? (v&s-value thing)))))
+core/truth-maintenance.scm:(declare-coercion v&s? ->tms)
+core/truth-maintenance.scm:  (lset= v&s-equivalent? (tms-values tms1) (tms-values tms2)))
+core/truth-maintenance.scm:  (let ((values (filter v&s? (map v&s-> (map ->contingent (tms-values tms))))))
+core/truth-maintenance.scm:		(v&s? (car values))
+core/truth-maintenance.scm:		(null? (v&s-support (car values))))
+core/truth-maintenance.scm:	   (v&s-value (car values)))
+examples/albatross-conundrum.scm: (map v&s-value (map tms-query answer))
+examples/masyu.scm:       (v&s-value (tms-query (content cell)))))
+examples/masyu.scm:       (not (v&s-value (tms-query (content cell))))))
+examples/masyu.scm:(define (fail-together v&ss)
+examples/masyu.scm:  (process-nogood! (apply lset-union eq? (map v&s-support v&ss))))
+examples/masyu.scm:      (let* ((decided (filter v&s? (map tms-query
+examples/masyu.scm:	     (on (filter v&s-value decided)))
+examples/masyu.scm:	      (let ((v&s (tms-query content)))
+examples/masyu.scm:		(if (nothing? v&s)
+examples/masyu.scm:		    (if (v&s-value v&s)
+examples/multiple-dwelling.scm: (map v&s-value (map tms-query (map content answers)))
+examples/multiple-dwelling.scm: (map v&s-value (map tms-query (map content answers)))
+examples/riddle-of-the-knights.scm: (map v&s-value (map tms-query answer))
+examples/slow-examples.scm:     (map v&s-value (map tms-query (show-time find-solution)))))
+examples/slow-examples.scm:   (let ((answer (map v&s-value (map tms-query (show-time
+examples/sudoku.scm:      (v&s-value (tms-query thing))))
+extensions/symbolics-ineq.scm:		 (generic-flatten (v&s-value the-value))
+extensions/symbolics-ineq.scm:	       (v&s-support the-value))))))))
+extensions/symbolics.scm:		 (generic-flatten (v&s-value the-value))
+extensions/symbolics.scm:	       (v&s-support the-value))))))))
+extensions/test-utils.scm:   (apply append (map v&s-support (filter v&s? (map tms-query (filter tms? (map content cells))))))))
+support/generics-again.scm:   (4 #[compiled-procedure 369 (v&s? "supported-values" #x4) #xf #xed97e7])
+support/generics-again.scm:   (1 #[compiled-procedure 369 (v&s? "supported-values" #x4) #xf #xed97e7])
+support/generics-again.scm:   #[compiled-procedure 369 (v&s? "supported-values" #x4) #xf #xed97e7]
+gjs@maharal:prop$ 

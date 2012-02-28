@@ -48,6 +48,15 @@
 (defhandler binary-map
   (lambda (x y) (lambda (f) nothing))
   any? nothing?)
+
+
+(defhandler binary-map
+  (lambda (x y) (lambda (f) nothing))
+  contradictory? any?)
+
+(defhandler binary-map
+  (lambda (x y) (lambda (f) nothing))
+  any? contradictory?)
 
 (define (unary-mapping f)
   (name!
@@ -117,6 +126,11 @@
 (defhandler generic-unpack
   (lambda (object function) nothing)
   nothing? any?)
+
+(defhandler generic-unpack
+  (lambda (object function) nothing)
+  contradictory? any?)
+
 
 ;;; This handler is redundant but harmless
 (defhandler generic-flatten

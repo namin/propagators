@@ -24,4 +24,5 @@
     "multiple-dwelling-test"
     "recursive-sqrt-test"
     "sudoku-test"
-    "belief-propagation-test"))
+    "belief-propagation-test"
+    "galaxy-range-test"))

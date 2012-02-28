@@ -49,12 +49,32 @@
 	     (cons tree answer)))))
   (delete-duplicates (filter symbolic-variable? (tree-fringe expr))))
 
+(define-structure (inequality (constructor %%make-inequality) safe-accessors)
+  direction
+  expr1
+  expr2
+  variables)
+
+(define (inequality->list ineq)
+  `(,(inequality-direction ineq)
+    ,(inequality-expr1 ineq)
+    ,(inequality-expr2 ineq)))
+
+(define (list->inequality lst)
+  (if (inequality? lst)
+      lst
+      (if (and (pair? lst)
+	       (= 3 (length lst))
+	       (memq (car lst) '(< > <= >=)))
+	  (%make-inequality (car lst) (cadr lst) (caddr lst))
+	  (error "Given object does not look like an inequality" lst))))
+
 (define (%make-inequality dir expr1 expr2)
   (if (not (memq dir '(< <= > >=)))
       (error "Unsupported direction" dir))
   (let ((expr1 (simplify expr1))
 	(expr2 (simplify expr2)))
-    (list dir expr1 expr2 (find-variables (cons expr1 expr2)))))
+    (%%make-inequality dir expr1 expr2 (find-variables (cons expr1 expr2)))))
 
 (define (make-inequality dir expr)
   (%make-inequality dir expr 0))
@@ -64,9 +84,6 @@
       (error "Incomplete solution" dir var answer))
   (%make-inequality dir var answer))
 
-(define (inequality-direction ineq) (car ineq))
-(define (inequality-expr1 ineq) (cadr ineq))
-(define (inequality-expr2 ineq) (caddr ineq))
 (define (inequality-expression ineq)
   (if (and (number? (inequality-expr2 ineq))
 	   (= 0 (inequality-expr2 ineq)))
@@ -74,14 +91,16 @@
       (simplify
        (symb:- (inequality-expr1 ineq)
 	       (inequality-expr2 ineq)))))
-(define (inequality-variables ineq) (cadddr ineq))
 (define (the-ineq-variable ineq)
   (if (= 1 (length (inequality-variables ineq)))
       (car (inequality-variables ineq))
       (error "No unique variable in" ineq)))
 
+(define (normalized-ineq? ineq)
+  (number? (inequality-expr2 ineq)))
+
 (define (normalize-ineq ineq)
-  (if (solved-ineq? ineq)
+  (if (normalized-ineq? ineq)
       ineq
       (make-inequality
        (inequality-direction ineq)
@@ -120,14 +139,16 @@
 ;;; This is the main interface to the inequality solver.  Given a list
 ;;; of inequalities, it either returns a simplified list of
 ;;; inequalities, of #f if the inequalities are inconsistent.
+(define (solve-inequalities inequalities)
+  (let ((answer (simplify-inequalities (map list->inequality inequalities))))
+    (and answer (map inequality->list answer))))
+
 (define (simplify-inequalities inequalities)
-  (let loop ((inequalities inequalities)
+  (let loop ((inequalities (map simplify-ineq inequalities))
 	     (solved '())
 	     (unsolved '()))
     (if (null? inequalities)
-	(let ((consistent (consistent-subset solved)))
-	  (and consistent
-	       (append consistent unsolved)))	
+	(consistent-subset (append unsolved solved))	
 	(try-inequality
 	 (car inequalities)
 	 (lambda (deduction)
@@ -148,21 +169,23 @@
 		 solved 
 		 (cons (car inequalities) unsolved)))))))
 
-(define (consistent-subset solved-inequalities)
-  (let loop ((variables
-	      (delete-duplicates
-	       (map the-ineq-variable solved-inequalities)))
-	     (answer '()))
-    (if (null? variables)
-	answer
-	(let ((one-var-consistent
-	       (consistent-subset-one-var
-		(filter (lambda (ineq)
-			  (equal? (car variables)
-				  (the-ineq-variable ineq)))
-			solved-inequalities))))
-	  (and one-var-consistent
-	       (loop (cdr variables) (append one-var-consistent answer)))))))
+(define (consistent-subset inequalities)
+  (let ((inequalities (map normalize-ineq inequalities)))
+    (let loop ((expressions
+		(delete-duplicates
+		 (map inequality-expr1 inequalities)))
+	       (answer '()))
+      (if (null? expressions)
+	  answer
+	  (let ((one-expr-consistent
+		 (consistent-subset-one-expr
+		  (filter (lambda (ineq)
+			    (equal? (car expressions)
+				    (inequality-expr1 ineq)))
+			  inequalities))))
+	    (and one-expr-consistent
+		 (loop (cdr expressions)
+		       (append one-expr-consistent answer))))))))
 
 (define (minimum lst <)
   (if (null? lst)
@@ -181,17 +204,9 @@
 (define (lower-bound-ineq? ineq)
   (memq (inequality-direction ineq) '(> >=)))
 
-(define (solved-upper-bound-ineq? ineq)
-  (and (upper-bound-ineq? ineq)
-       (solved-ineq? ineq)))
-
-(define (solved-lower-bound-ineq? ineq)
-  (and (lower-bound-ineq? ineq)
-       (solved-ineq? ineq)))
-
 (define (stricter-upper-bound? ineq1 ineq2)
-  (and (solved-upper-bound-ineq? ineq1)
-       (solved-upper-bound-ineq? ineq2)
+  (and (equal? (inequality-expr1 ineq1)
+	       (inequality-expr1 ineq2))
        (or (< (inequality-expr2 ineq1)
 	      (inequality-expr2 ineq2))
 	   (and (= (inequality-expr2 ineq1)
@@ -201,8 +216,8 @@
 			 (eq? '<= (inequality-direction ineq2))))))))
 
 (define (stricter-lower-bound? ineq1 ineq2)
-  (and (solved-lower-bound-ineq? ineq1)
-       (solved-lower-bound-ineq? ineq2)
+  (and (equal? (inequality-expr1 ineq1)
+	       (inequality-expr1 ineq2))
        (or (> (inequality-expr2 ineq1)
 	      (inequality-expr2 ineq2))
 	   (and (= (inequality-expr2 ineq1)
@@ -211,11 +226,13 @@
 		    (and (eq? '>= (inequality-direction ineq1))
 			 (eq? '>= (inequality-direction ineq2))))))))
 
-(define (consistent-subset-one-var solved-inequalities)
-  (let ((best-upper-bound (minimum (filter solved-upper-bound-ineq? solved-inequalities)
-				   stricter-upper-bound?))
-	(best-lower-bound (minimum (filter solved-lower-bound-ineq? solved-inequalities)
-				   stricter-lower-bound?)))
+(define (consistent-subset-one-expr inequalities)
+  (let ((best-upper-bound
+	 (minimum (filter upper-bound-ineq? inequalities)
+		  stricter-upper-bound?))
+	(best-lower-bound
+	 (minimum (filter lower-bound-ineq? inequalities)
+		  stricter-lower-bound?)))
     (cond ((and best-upper-bound best-lower-bound)
 	   (let ((consistent?
 		  (evaluate-ineq
@@ -395,3 +412,46 @@
 	   (loop (cdr addends)
 		 coefficients-of-var
 		 (cons (car addends) constants))))))
+
+(define (simplify-ineq ineq)
+  (define (try-power dir expr num loop done)
+    (numerify
+     (cadr (operands expr))
+     (lambda (power)
+       (if (even? power)
+	   ;; Even powers are not monotonic
+	   (done)
+	   (loop dir (car (operands expr)) (expt num (/ 1 power)))))
+     done))
+  (define (try-product dir expr num loop done)
+    (let ((numbers (filter number? expr)))
+      (if (null? numbers)
+	  (done)
+	  (let ((coeff (apply * numbers)))
+	    ;; Assume coeff = 0 would have simplifed already
+	    (loop (if (> coeff 0) dir (reverse-sense dir))
+		  (simplify (symb:/ expr coeff))
+		  (/ num coeff))))))
+  (define (try-sum dir expr num loop done)
+    (let ((numbers (filter number? expr)))
+      (if (null? numbers)
+	  (done)
+	  (let ((addend (apply + numbers)))
+	    (loop dir
+		  (simplify (symb:- expr addend))
+		  (- num addend))))))
+  (let ((ineq (normalize-ineq ineq)))
+    (if (determined-ineq? ineq)
+	ineq
+	(let loop ((dir (inequality-direction ineq))
+		   (expr (inequality-expr1 ineq))
+		   (num  (inequality-expr2 ineq)))
+	  (define (done)
+	    (%make-inequality dir expr num))
+	  (cond ((expt? expr)
+		 (try-power dir expr num loop done))
+		((product? expr)
+		 (try-product dir expr num loop done))
+		((sum? expr)
+		 (try-sum dir expr num loop done))
+		(else (done)))))))

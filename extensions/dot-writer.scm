@@ -50,7 +50,7 @@
 
   (define (node-shape node)
     (cond ((cell? node) "ellipse")
-	  ((propagator? node) "box")
+	  ((diagram? node) "box")
 	  (else
 	   (error "Unshapeable node type" node))))
 

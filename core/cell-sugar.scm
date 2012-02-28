@@ -42,7 +42,7 @@
 (define-syntax define-cell
   (syntax-rules ()
     ((define-cell symbol form)
-     (define symbol (name-locally! (ensure-cell form) 'symbol)))
+     (define symbol (register-diagram (ensure-cell form) 'symbol)))
     ((define-cell symbol)
      (define-cell symbol (make-named-cell 'symbol)))))
 
@@ -74,7 +74,7 @@
    (syntax-rules ()
      ((let-cells ((name form) ...)
 	form ...)
-      (let ((name (name-locally! (ensure-cell form) 'name)) ...)
+      (let ((name (register-diagram (ensure-cell form) 'name)) ...)
 	form ...))
      ((let-cells (name ...)
 	form ...)
@@ -106,7 +106,7 @@
     ((let-cells "done"
        ((cell-name cell-form) ...)
        form ...)
-     (let ((cell-name (name-locally! (ensure-cell cell-form) 'cell-name)) ...)
+     (let ((cell-name (register-diagram (ensure-cell cell-form) 'cell-name)) ...)
        form ...))))
 
 (define-syntax normalize-let-clauses

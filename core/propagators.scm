@@ -32,12 +32,11 @@
 ;;; more network structure if needed), but the system doesn't need to
 ;;; know anything about that.
 
-(define (propagator neighbors to-do)
+(define (propagator neighbors to-do)  
   (for-each (lambda (cell)
               (new-neighbor! cell to-do))
             (listify neighbors))
   (eq-put! to-do 'propagator #t)
-  (network-register to-do)
   (alert-propagator to-do)
   to-do)
 
@@ -83,18 +82,27 @@
 
 ;;; This version has additional metadata to allow the propagator
 ;;; network to be effectively traversed (see extensions/draw.scm)
+
 (define (function->propagator-constructor f)
-  (propagator-constructor!
-   (lambda cells
-     (let ((output (ensure-cell (car (last-pair cells))))
-	   (inputs (map ensure-cell (except-last-pair cells))))
-       (let ((the-propagator
-	      (lambda ()
-		(add-content output (apply f (map content inputs))))))
-	 (eq-adjoin! output 'shadow-connections the-propagator)
-	 (eq-label! the-propagator 'name f
-                    'inputs inputs 'outputs (list output))
-	 (propagator inputs the-propagator))))))
+  (let ((n (name f)))
+    (define (the-constructor . cells)
+      (let ((output (ensure-cell (last cells)))
+	    (inputs (map ensure-cell (except-last-pair cells)))
+	    (the-diagram #f))
+	(define (the-propagator)
+	  (fluid-let ((*active-diagram* the-diagram))
+	    (add-content output
+			 (apply f (map content inputs))
+			 the-propagator)))
+	(name! the-propagator (if (symbol? n)
+				  (symbol n ':p)
+				  f))
+	(propagator inputs the-propagator)
+	(set! the-diagram (make-anonymous-i/o-diagram
+			   the-propagator inputs (list output)))
+	(register-diagram the-diagram)))
+    (if (symbol? n) (name! the-constructor (symbol 'p: n)))
+    (propagator-constructor! the-constructor)))
 
 ;;; Returns a version of the supplied propagator constructor that
 ;;; creates a propagator that will wait until at least one of the
@@ -105,13 +113,26 @@
    (lambda args
      ;; TODO Can I autodetect "inputs" that should not trigger
      ;; construction?
-     (let ((args (map ensure-cell args)))
-       (one-shot-propagator args
-	(apply eq-label!
-	       (lambda ()
-		 (apply prop-ctor args))
-	       (compute-aggregate-metadata prop-ctor args)))))))
+     (let ((args (map ensure-cell args))
+	   (answer-diagram #f))
+       (define the-propagator
+	 (one-shot-propagator
+	  args
+	  (lambda ()
+	    (fluid-let ((register-diagram
+			 (lambda (diagram #!optional name)
+			   (replace-diagram! answer-diagram diagram)
+			   diagram)))
+	      (apply prop-ctor args)))))
+       ;; This is the analogue of (compute-aggregate-metadata
+       ;; prop-ctor args) TODO much work can be saved by use of the
+       ;; diagram made by MAKE-COMPOUND-DIAGRAM.
+       (set! answer-diagram
+	     (make-diagram-for-compound-constructor
+	      the-propagator prop-ctor args))
+       (register-diagram answer-diagram)))))
 
+;; This is a peer of PROPAGATOR
 (define (one-shot-propagator neighbors action)
   (let ((done? #f) (neighbors (map ensure-cell (listify neighbors))))
     (define (test)
@@ -120,11 +141,5 @@
           (if (every nothing? (map content neighbors))
               'ok
               (begin (set! done? #t)
-		     (in-network-group (network-group-of test)
-		      (lambda ()
-			;; The act of expansion makes the compound
-			;; itself uninteresting
-			(network-unregister test)
-			(action)))))))
-    (eq-clone! action test)
+		     (action)))))
     (propagator neighbors test)))

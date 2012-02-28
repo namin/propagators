@@ -53,6 +53,12 @@
 		   (symb-ineq-local object)
 		   (symb-ineq-global object))))
 
+(define-method generic-match ((pattern <pair>) (object rtd:inequality))
+  (generic-match pattern `(,@(inequality->list object) ,(inequality-variables object))))
+
+(define-method generic-match ((pattern rtd:inequality) (object rtd:inequality))
+  (generic-match (inequality->list pattern) (inequality->list object)))
+
 (define-method generic-match ((pattern <vector>) (object rtd:frs))
   (if (stale-frs? object)
       (generic-match

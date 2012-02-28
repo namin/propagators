@@ -652,7 +652,7 @@ and output cells.  <TT>p:abs</TT>, <TT>p:square</TT>, <TT>p:sqrt</TT>,
 <TT>p:not</TT>, <TT>p:pair?</TT>, and <TT>p:null?</TT> accept one input cell and one
 output cell.  <TT>p:+</TT>, <TT>p:-</TT>, <TT>p:*</TT>, <TT>p:/</TT>, <TT>p:=</TT>, <TT>p:&lt;</TT>,
 <TT>p:&gt;</TT>, <TT>p:&lt;=</TT>, <TT>p:&gt;=</TT>, <TT>p:and</TT>, <TT>p:or</TT>, <TT>p:eq?</TT>,
-<TT>p:eqv?</TT>, and <TT>p:expt</TT>, accept two input cells and one output
+<TT>p:eqv?</TT>, <TT>p:atan2</TT>, and <TT>p:expt</TT>, accept two input cells and one output
 cell.
 
 <P>
@@ -705,7 +705,7 @@ Two-armed conditional propagation.  May be defined by use of two
 <DT><STRONG><TT>(p:conditional-router control input consequent alternate)</TT>,</STRONG></DT>
 <DD>
 </DD>
-<DT><STRONG><TT>(p:conditional-router control input consequent)</TT></STRONG></DT>
+<DT><STRONG><TT>(e:conditional-router control input consequent)</TT></STRONG></DT>
 <DD>
 Two-output-armed conditional propagation.  This is symmetric with
 <TT>conditional</TT>; the <TT>consequent</TT> and <TT>alternate</TT> are possible
@@ -928,8 +928,18 @@ c:+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 <BR>c:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:/&nbsp;
 <BR>c:square&nbsp;&nbsp;ce:square&nbsp;&nbsp;ce:sqrt&nbsp;
 <BR>c:not&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:not&nbsp;
+<BR>c:and&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:and&nbsp;
+<BR>c:or&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:or&nbsp;
 <BR>c:id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:id&nbsp;
-<BR>c:==&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:==
+<BR>c:==&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:==&nbsp;
+<BR>c:negate&nbsp;&nbsp;ce:negate&nbsp;
+<BR>c:invert&nbsp;&nbsp;ce:invert&nbsp;
+<BR>c:sin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:sin&nbsp;
+<BR>c:cos&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:cos&nbsp;
+<BR>c:tan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:tan&nbsp;
+<BR>c:exp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:exp&nbsp;
+<BR>c:eq?&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ce:eq&nbsp;
+<BR>c:eqv?&nbsp;&nbsp;&nbsp;&nbsp;ce:eqv&nbsp;
 </TT>
 </BLOCKQUOTE>
 </DD>
@@ -1713,6 +1723,14 @@ interval.  An interval is <TT>equivalent?</TT> to a number if both the
 upper and lower bounds are that number.
 
 <P>
+Arithmetic can be performed on intervals.  They can be compared, and
+the comparison predicates will have a truth value only when no future shrinkage
+of the intervals can change that value.  For example, <TT>(e:&lt; int1 int2)</TT> will
+be true only if <TT>(e:&lt; (interval-high int1) (interval-low int2))</TT>; it 
+will be false only if <TT>(e:&gt;= (interval-low int1) (interval-high int2))</TT>; 
+otherwise the result of the comparison is <TT>nothing</TT>.
+
+<P>
 Interval objects merge with each other by intersection.  Interval
 object merge with numbers by treating the number as a degenerate
 interval and performing intersection (whose result will either be that
@@ -1737,11 +1755,12 @@ It is an error for an interval object to appear in the operator
 position of an apply propagator.
 
 <P>
-As an interval arithmetic facility, this one is very primitive.  In
-particular it assumes that all the numbers involved are positive.  The
-main purpose of including it is to have a partial information
-structure with an intuitive meaning, and that requires nontrivial
-operations on the information it is over.
+As an interval arithmetic facility, this one is very primitive.  It
+cannot extract new information from division by an interval that contains zero, because that 
+would require intervals around the point at infinity.
+The main purpose of including intervals is to have a partial
+information structure with an intuitive meaning, and that requires
+nontrivial operations on the information it is over.
 
 <P>
 
@@ -3817,10 +3836,10 @@ Mathematics Department, Macquarie University, Sydney.
 The command line arguments were: <BR>
  <STRONG>latex2html</STRONG> <TT>-split 0 -nonavigation revised-html</TT>
 <P>
-The translation was initiated by Alexey Radul on 2010-09-09<BR><HR>
+The translation was initiated by Gerald Jay Sussman on 2011-03-16<BR><HR>
 <ADDRESS>
-Alexey Radul
-2010-09-09
+Gerald Jay Sussman
+2011-03-16
 </ADDRESS>
 </BODY>
 </HTML>

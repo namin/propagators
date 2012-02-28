@@ -226,7 +226,8 @@
 		 (generic-flatten (v&s-value the-value))
 		 (symb-ineq-local symb-ineq)
 		 (symb-ineq-global symb-ineq)))
-	       (v&s-support the-value))))))))
+	       (v&s-support the-value)
+	       (v&s-informants the-value))))))))
   (guard rtd:symb-ineq (lambda (thing) (tms? (symb-ineq-expression thing)))))
 
 (defhandler generic-flatten
@@ -342,7 +343,10 @@
 (no-abstract-comparisons generic->=)
 (no-abstract-comparisons generic-<=)
 
+#|
 ;;; TODO This feels like a hack...
+;;; moved to standard-propagators
 (defhandler generic-/ 
   (lambda (a b) nothing)
   any? (lambda (x) (and (number? x) (zero? x))))
+|#

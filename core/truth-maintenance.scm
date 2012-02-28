@@ -21,11 +21,29 @@
 
 (declare (usual-integrations make-cell cell?))
 
+#|
+;;; This causes real trouble with pretty-printing
 (define-structure
   (tms (type vector) (named 'tms)
        (constructor %make-tms) (print-procedure #f)
        (safe-accessors #t))
   values)
+|#
+
+(define (%make-tms values)
+  (vector 'tms values))
+
+(define (tms? x)
+  (and (vector? x) (eq? (vector-ref x 0) 'tms)))
+
+(define (tms-values tms)
+  (if (not (tms? tms)) (error "Bad tms -- TMS-VALUES" tms))
+  (vector-ref tms 1))
+
+(define (set-tms-values! tms new-values)
+  (if (not (tms? tms)) (error "Bad tms -- SET-TMS-VALUES!" tms))
+  (vector-set! tms 1 new-values))
+
 
 (define (make-tms arg)
   (%make-tms (listify arg)))
@@ -147,7 +165,9 @@
     (generic-flatten
      (make-tms
       (generic-flatten
-       (supported (tms-query (v&s-value v&s)) (v&s-support v&s))))))
+       (supported (tms-query (v&s-value v&s))
+		  (v&s-support v&s)
+		  (v&s-informants v&s))))))
   (lambda (thing) (and (v&s? thing) (tms? (v&s-value thing)))))
 
 (declare-coercion-target tms
@@ -160,7 +180,7 @@
 
 (define (tms-equivalent? tms1 tms2)
   (lset= v&s-equivalent? (tms-values tms1) (tms-values tms2)))
-(defhandler equivalent? tms-equivalent? tms? tms?)
+(defhandler-coercing equivalent? tms-equivalent? ->tms)
 
 (define (the-tms-handler thing1 thing2)
   (tms-merge thing1 thing2))
@@ -168,17 +188,15 @@
 (defhandler-coercing merge the-tms-handler ->tms)
 
 (define (tms-> tms)
-  (cond ((null? (tms-values tms))
-	 nothing)
-	((and (= 1 (length (tms-values tms)))
-	      (v&s? (car (tms-values tms)))
-	      (null? (v&s-support (car (tms-values tms)))))
-	 (v&s-value (car (tms-values tms))))
-	((and (= 1 (length (tms-values tms)))
-	      (nothing? (car (tms-values tms))))
-	 nothing)
-	(else
-	 tms)))
+  (let ((values (filter v&s? (map v&s-> (map ->contingent (tms-values tms))))))
+    (cond ((null? values)
+	   nothing)
+	  ((and (= 1 (length values))
+		(v&s? (car values))
+		(null? (v&s-support (car values))))
+	   (v&s-value (car values)))
+	  (else
+	   (make-tms values)))))
 
 (define (tms-binary-map tms1 tms2)
   (lambda (f)
