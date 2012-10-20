@@ -49,3 +49,30 @@
 
 (inquire (eq-get (eq-get 'Fatso 'bmi) 'obese)) ;; #t
 (inquire (eq-get (eq-get 'Skinny 'bmi) 'underweight)) ;; #t
+
+;; Problem 7.2: Building more constraints
+
+(define (c:sum part-nodes sum-node)
+  (let loop ((part-nodes part-nodes) (acc (e:constant 0)))
+    (if (null? part-nodes)
+        (c:== acc sum-node)
+        (let ((new-acc (make-cell)))
+          (c:+ (car part-nodes) acc new-acc)
+          (loop (cdr part-nodes) new-acc)))))
+
+(define (breakdown sum-node . part-names)
+  (for-each (lambda (part-name)
+              (let-cell part
+                        (add-branch! sum-node part part-name)))
+            part-names)
+  (c:sum (map (lambda (part-name) (eq-get sum-node part-name)) part-names)
+         sum-node)
+  'done)
+
+(define (combine-financial-entities compound . parts)
+  (assert (every financial-entity? parts))
+  (define (c f) (c:sum (map f parts) (f compound)))
+  (c gross-income)
+  (c net-income)
+  (c expenses)
+  'done)
