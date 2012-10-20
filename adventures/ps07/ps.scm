@@ -5,7 +5,7 @@
 ;; a.
 
 (define (make-person person)
-  (let-cells (height weight income expenses)
+  (let-cells (height weight)
     (eq-put! person 'height height)
     (eq-put! person 'weight weight)
     'done))
@@ -28,10 +28,12 @@
   (let ((height-m (ce:/ (eq-get person 'height) 100.0))
         (weight-kg (eq-get person 'weight)))
     (eq-put! person 'bmi (ce:/ weight-kg (ce:* height-m height-m)))
-    (add-interval-property (eq-get person 'bmi) (make-interval 0.0 19.0) 'underweight)
-    (add-interval-property (eq-get person 'bmi) (make-interval 19.0 25.0) 'normal)
-    (add-interval-property (eq-get person 'bmi) (make-interval 25.0 30.0) 'overweight)
-    (add-interval-property (eq-get person 'bmi) (make-interval 30.0 100.0) 'obese)
+    ((c:bins (named-ranges 'bmi-estimate
+                           `(underweight ,(make-interval 0.0 19.0))
+                           `(normal      ,(make-interval 19.0 25.0))
+                           `(overweight  ,(make-interval 25.0 30.0))
+                           `(obese       ,(make-interval 30.0 100.0))))
+     (eq-get person 'bmi))
     'done))
 
 (bmi 'Nada)
